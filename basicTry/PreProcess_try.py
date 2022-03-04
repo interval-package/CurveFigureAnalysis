@@ -17,9 +17,9 @@ def spliter(rawpic):
 # 外包装SideFilter
 def FilterSelf(self):
     if self.testVersion:
-        img = self.SideFilter(self.processedPic, self.GetColorBoundry()[1])
+        img = self.SideFilter(self.processedPic, self.GetColorInterval()[1])
     else:
-        img = self.SideFilter(self.rawPic, self.GetColorBoundry()[1])
+        img = self.SideFilter(self.rawPic, self.GetColorInterval()[1])
     if ~(self.binaryPic.any() == np.ndarray([])):
         self.binaryPic = img
     return img
