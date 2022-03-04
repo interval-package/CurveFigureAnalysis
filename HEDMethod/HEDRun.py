@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 
 # we cite the work of arXiv:1504.06375 [cs.CV]
@@ -9,27 +10,6 @@ import os
 import PIL
 import PIL.Image
 import sys
-
-##########################################################
-
-assert (int(str('').join(torch.__version__.split('.')[0:2])) >= 13)  # requires at least pytorch version 1.3.0
-
-torch.set_grad_enabled(False)  # make sure to not compute gradients for computational performance
-
-torch.backends.cudnn.enabled = True  # make sure to use cudnn for computational performance
-
-##########################################################
-
-arguments_strModel = 'bsds500'  # only 'bsds500' for now
-arguments_strIn = '../images/draw.png'
-arguments_strOut = './out.png'
-
-for strOption, strArgument in \
-        getopt.getopt(sys.argv[1:], '', [strParameter[2:] + '=' for strParameter in sys.argv[1::2]])[0]:
-    if strOption == '--model' and strArgument != '': arguments_strModel = strArgument  # which model to use
-    if strOption == '--in' and strArgument != '': arguments_strIn = strArgument  # path to the input image
-    if strOption == '--out' and strArgument != '': arguments_strOut = strArgument  # path to where the output should
-    # be stored
 
 
 # end
@@ -138,6 +118,7 @@ class Network(torch.nn.Module):
 
 # end
 
+# global network, only load the network once
 netNetwork = None
 
 
@@ -146,6 +127,7 @@ netNetwork = None
 def estimate(tenInput):
     global netNetwork
 
+    # load network
     if netNetwork is None:
         netNetwork = Network().cuda().eval()
     # end
@@ -166,10 +148,23 @@ def estimate(tenInput):
 # end
 
 ##########################################################
+# output function
+# the pic must be 320(row)*480(col)*3(canal)
 
-if __name__ == '__main__':
+def HEDDetect(pic: np.ndarray):
     tenInput = torch.FloatTensor(numpy.ascontiguousarray(
-        numpy.array(PIL.Image.open(arguments_strIn))[:, :, ::-1].transpose(2, 0, 1).astype(numpy.float32) * (
+        pic[:, :, ::-1].transpose(2, 0, 1).astype(numpy.float32) * (
+                1.0 / 255.0)))
+
+    tenOutput = estimate(tenInput)
+
+    output = (tenOutput.clip(0.0, 1.0).numpy().transpose(1, 2, 0)[:, :, 0] * 255.0).astype(numpy.uint8)
+    return output
+
+
+def HEDDetectSave(pic: np.ndarray):
+    tenInput = torch.FloatTensor(numpy.ascontiguousarray(
+        pic[:, :, ::-1].transpose(2, 0, 1).astype(numpy.float32) * (
                 1.0 / 255.0)))
 
     tenOutput = estimate(tenInput)
@@ -177,4 +172,36 @@ if __name__ == '__main__':
     PIL.Image.fromarray(
         (tenOutput.clip(0.0, 1.0).numpy().transpose(1, 2, 0)[:, :, 0] * 255.0).astype(numpy.uint8)).save(
         arguments_strOut)
+
+
+##########################################################
+
+if __name__ == '__main__':
+    arguments_strModel = 'bsds500'  # only 'bsds500' for now
+    arguments_strIn = '../images/sample.png'
+    arguments_strOut = './out.png'
+
+    ##########################################################
+
+    assert (int(str('').join(torch.__version__.split('.')[0:2])) >= 13)  # requires at least pytorch version 1.3.0
+
+    torch.set_grad_enabled(False)  # make sure to not compute gradients for computational performance
+
+    torch.backends.cudnn.enabled = True  # make sure to use cudnn for computational performance
+
+    ##########################################################
+
+    for strOption, strArgument in \
+            getopt.getopt(sys.argv[1:], '', [strParameter[2:] + '=' for strParameter in sys.argv[1::2]])[0]:
+        if strOption == '--model' and strArgument != '':
+            arguments_strModel = strArgument  # which model to use
+        if strOption == '--in' and strArgument != '':
+            arguments_strIn = strArgument  # path to the input image
+        if strOption == '--out' and strArgument != '':
+            arguments_strOut = strArgument  # path to where the output should
+        # be stored
+
+    pic = numpy.array(PIL.Image.open(arguments_strIn))
+    HEDDetectSave(pic)
+    pass
 # end
