@@ -1,7 +1,5 @@
 from functools import singledispatch
-
 import matplotlib.pyplot as plt
-
 from LineFigure import LineFigure
 import numpy as np
 import cv2

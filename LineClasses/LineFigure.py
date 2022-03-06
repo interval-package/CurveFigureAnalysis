@@ -81,21 +81,21 @@ def LinePointDetectCentralize(scrGray):
     return idx_x, idx_y, idx_x_sep, idx_y_sep
 
 
-# 图像有效性验证，如果图像内部为真的像素点过少，则验证失败
-def binPicCertification(pic: np.ndarray, gap=10000) -> bool:
-    if pic.ndim > 2:
-        raise ValueError("you should input a binary pic for certification")
-    hist_inner = cv2.calcHist([pic], [0], None, [2], [0, 256])
-    print(hist_inner)
-    return hist_inner[-1] > gap
-
-
 class LineFigure(object):
     @abc.abstractmethod
-    def __init__(self, rawPic, picLable=None, givePic=None, testVersion=False):
+    def __init__(self, rawPic, givenPic=None, picLabel=None, testVersion=False):
+        """
+        :param rawPic:
+        :param givenPic: the given pic, maybe None
+        :param picLabel:
+        :param testVersion: test or not, if test, do the main func
+        """
         # testVersion：是否以测试模式构建对象
+        if isinstance(rawPic, str):
+            raise TypeError("this method is dealt with np.ndarray get str instead, "
+                            "please use the class Method @fromFile for str path ")
         self.testVersion = testVersion
-        self.rawPic, self.binaryPic, self.picLable = rawPic, picLable, givePic
+        self.rawPic, self.givePic, self.picLable = rawPic, givenPic, picLabel
         self.mask = self.getMask()
 
         # preprocess, get blurred gray scale pic
@@ -105,6 +105,8 @@ class LineFigure(object):
             return gray
 
         self.gray = process2Gray(self.rawPic)
+
+        self.processedPic = None
 
         if testVersion:
             self.main()
@@ -116,8 +118,22 @@ class LineFigure(object):
         :parameter basicPath: the folder containing the pics
         :param testVersion: test or not
         """
-        rawPic, binaryPic, picLable = readLine(basicPath)
-        return cls(rawPic, binaryPic, picLable, testVersion)
+        rawPic, binaryPic, picLabel = readLine(basicPath)
+        return cls(rawPic, binaryPic, picLabel, testVersion)
+
+    @staticmethod
+    def binPicCertification(pic: np.ndarray, gap=10000) -> bool:
+        """
+        :param pic: binary pic
+        :param gap: the minimal num of valid points
+        :return: bool, the pic is valid or not
+        """
+        # 图像有效性验证，如果图像内部为真的像素点过少，则验证失败
+        if pic.ndim > 2:
+            raise ValueError("you should input a binary pic for certification")
+        hist_inner = cv2.calcHist([pic], [0], None, [2], [0, 256])
+        print(hist_inner)
+        return hist_inner[-1] > gap
 
     def getMask(self) -> np.ndarray:
         """
@@ -125,7 +141,7 @@ class LineFigure(object):
         """
         rows, cols = self.rawPic.shape[:2]
         maskArea = np.zeros([rows, cols], dtype=np.uint8)
-        maskArea[int(rows / 7):int(7 * rows / 8), int(cols / 8):int(8 * cols / 9)] = 255
+        maskArea[int(rows*0.125):int(rows*0.875), int(cols*0.127):int(cols*0.9)] = 255
         return maskArea
 
     def GetColorInterval(self, channel=0, LineCloNums=2, distance=20):
@@ -160,7 +176,7 @@ class LineFigure(object):
 
     def TotalFilter(self, distance=10):
         """
-        :parameter distance:　for each filtered clo we define a gap for each to in range
+        :param distance:　for each filtered clo we define a gap for each to in range
         :return extraction of three Channel plus gray figure
         """
         # 对三个色道，以及灰度的图片进行基于色值分布曲线的提取
@@ -203,37 +219,51 @@ class LineFigure(object):
 
     def imgOverlay(self) -> np.ndarray:
         result = None
+
         gray, b, g, r = self.TotalFilter()
         thresPic = cv2.bitwise_and(
             cv2.adaptiveThreshold(src=self.gray, maxValue=255, adaptiveMethod=cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
                                   thresholdType=cv2.THRESH_BINARY_INV, blockSize=11, C=12),
             self.mask)
 
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (8, 5))
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (7, 3))
         cannyPic = cv2.dilate(cv2.Canny(self.gray, threshold1=5, threshold2=5), kernel)
         cannyPic = cv2.bitwise_and(cannyPic, self.mask)
         for pic in [gray, b, g, r, thresPic, cannyPic]:
-            if binPicCertification(pic):
+            if self.binPicCertification(pic):
                 if result is None:
                     result = pic
                 else:
                     result = cv2.bitwise_and(result, pic)
         if result is None:
             raise ValueError("img overlay failed, with return None")
-        if ~binPicCertification(result, 20000):
+        if ~self.binPicCertification(result, 20000):
+            kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (11, 1))
             result = cv2.dilate(result, kernel)
+        if self.processedPic is None:
+            self.processedPic = result
+        return result
+
+    def smoothOutput(self):
+        if self.processedPic is None:
+            result = self.imgOverlay()
+        else:
+            result = self.processedPic
+        # kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+        # result = cv2.morphologyEx(result, cv2.MORPH_CLOSE, kernel)
+        # result = cv2.morphologyEx(result, cv2.MORPH_OPEN, kernel)
         return result
 
     def main(self):
         gray, b, g, r = self.TotalFilter()
-        thresPic = cv2.bitwise_and(
+        threshPic = cv2.bitwise_and(
             cv2.adaptiveThreshold(src=self.gray, maxValue=255, adaptiveMethod=cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
                                   thresholdType=cv2.THRESH_BINARY_INV, blockSize=11, C=12),
             self.mask)
         cannyPic = cv2.bitwise_and(
             cv2.Canny(self.gray, threshold1=5, threshold2=5),
             self.mask)
-        pics = [gray, b, g, r, thresPic, cannyPic, self.rawPic, self.imgOverlay()]
+        pics = [gray, b, g, r, threshPic, cannyPic, self.rawPic, self.imgOverlay(), self.smoothOutput()]
         plt.figure("1")
         for i, pic in zip(range(1, len(pics) + 1), pics):
             plt.subplot(3, 3, i)
@@ -245,5 +275,5 @@ class LineFigure(object):
 if __name__ == '__main__':
     for id in range(32, 100):
         print(id)
-        LineFigure("../../data/img_train_BrokenLine/%d" % id, True)
+        LineFigure.fromFile("../../data/img_train_BrokenLine/%d" % id, True)
     pass
