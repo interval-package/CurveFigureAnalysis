@@ -1,19 +1,8 @@
 import abc
 import cv2
-import math
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from functools import singledispatch
-
-
-def adpativeShow(inputs: list):
-    l = len(inputs)
-    n = math.ceil(math.sqrt(l))
-    fig = plt.figure("compiled show")
-    for i in range(l):
-        plt.subplot(n, n, i + 1), plt.imshow(inputs[i], 'gray'), plt.axis('off')
-    return fig
 
 
 def eraseFrame(img: np.ndarray) -> np.ndarray:
@@ -136,7 +125,7 @@ class LineFigure(object):
         """
         rows, cols = self.rawPic.shape[:2]
         maskArea = np.zeros([rows, cols], dtype=np.uint8)
-        maskArea[int(rows / 7):int(7 * rows / 8), int(cols / 8) + 1:int(8 * cols / 9) + 7] = 255
+        maskArea[int(rows / 7):int(7 * rows / 8), int(cols / 8):int(8 * cols / 9)] = 255
         return maskArea
 
     def GetColorInterval(self, channel=0, LineCloNums=2, distance=20):

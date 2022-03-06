@@ -63,10 +63,6 @@ def main(id):
     ColorCluster(src).show()
     ColorCluster(src, maskpic_target).show()
     plt.show()
-    # plt.figure()
-    # plt.subplot(1, 2, 1), plt.imshow(src)
-    # plt.subplot(1, 2, 2), plt.imshow(cv2.bitwise_and(src, src, mask=maskpic_target))
-    # plt.show()
 
 
 if __name__ == '__main__':
