@@ -110,7 +110,7 @@ class LineFigure(object):
         """
         rows, cols = self.rawPic.shape[:2]
         maskArea = np.zeros([rows, cols], dtype=np.uint8)
-        maskArea[int(rows*0.125):int(rows*0.875), int(cols*0.127):int(cols*0.9)] = 255
+        maskArea[int(rows * 0.125):int(rows * 0.875), int(cols * 0.127):int(cols * 0.9)] = 255
         return maskArea
 
     def GetColorInterval(self, channel=0, LineCloNums=2, distance=20):
@@ -219,9 +219,9 @@ class LineFigure(object):
         # if ~self.binPicCertification(result, 20000):
         #     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (11, 1))
         #     result = cv2.dilate(result, kernel)
-        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
-        result = cv2.morphologyEx(result, cv2.MORPH_CLOSE, kernel)
-        result = cv2.morphologyEx(result, cv2.MORPH_OPEN, kernel)
+        # kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+        # result = cv2.morphologyEx(result, cv2.MORPH_CLOSE, kernel)
+        # result = cv2.morphologyEx(result, cv2.MORPH_OPEN, kernel)
         return result
 
     @staticmethod
@@ -239,7 +239,7 @@ class LineFigure(object):
         scrGray = cv2.threshold(scrGray, 200, 255, cv2.THRESH_BINARY)[1]
 
         # 这里进行了一次旋转，因为np.where的遍历是沿着行方向进行的
-        idx_x, idx_y = np.where(cv2.rotate(scrGray, cv2.ROTATE_90_CLOCKWISE, 90))
+        idx_x, idx_y = np.where(cv2.flip(scrGray, 0))
 
         # 对x做一次差分，找出x有递增的点
         dx = np.diff(idx_x)
@@ -260,7 +260,6 @@ class LineFigure(object):
             idx_y_sep = idx_y
 
         return idx_x, idx_y, idx_x_sep, idx_y_sep
-
 
     def main(self):
         gray, b, g, r = self.TotalFilter()

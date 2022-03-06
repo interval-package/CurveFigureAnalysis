@@ -54,7 +54,7 @@ def DetectPointGoodFeatureMethod(src: np.ndarray, gap=0.01, maxCount=100, mask=N
 
 def linePointsPlot(src, points, color=None, PotType='line'):
     if color is None:
-        color = [0, 0, 255]
+        color = [125, 125, 125]
     if isinstance(points, tuple):
         x, y = points
     elif isinstance(points, np.ndarray):
@@ -62,13 +62,21 @@ def linePointsPlot(src, points, color=None, PotType='line'):
         y = points[:, 1]
     else:
         raise ValueError("unfitted input")
+    # 注意，这里图像要flip上下颠倒两次，才会画出正常的图像
+    src = cv2.flip(src, 0)
     if PotType == 'line':
         for i in range(0, len(x) - 1):
-            cv2.line(src, (x[i], y[i]), (x[i + 1], y[i + 1]), color=color)
-    else:
-        for i in range(0, len(x) - 1):
+            cv2.line(src, (x[i], y[i]), (x[i + 1], y[i + 1]), color=color, thickness=5)
+    elif PotType == 'circle':
+        for i in range(len(x)):
             cv2.circle(src, (x[i], y[i]), 5, color=color)
-    return src
+    elif PotType == 'dot':
+        for i in range(len(x)):
+            cv2.drawMarker(src, (x[i], y[i]), color=color, markerType=cv2.MARKER_CROSS, markerSize=2)
+    else:
+        raise ValueError("invalid PotType")
+    # 返回时再次颠倒
+    return cv2.flip(src, 0)
 
 
 class BrokenLineFigure(LineFigure):
@@ -90,17 +98,17 @@ class BrokenLineFigure(LineFigure):
         else:
             pic = self.smoothOutput()
         # 中心法获取图像点
-        _, _, x_c, y_c = LineFigure.LinePointDetectCentralize(pic)
+        x, y, x_c, y_c = LineFigure.LinePointDetectCentralize(pic)
         # Harris角点检测
         x_harris, y_harris, _, _ = DetectPointHarrisMethod(pic)
         plt.subplot(2, 2, 1)
         plt.plot(x_c, y_c, 'g')
         plt.subplot(2, 2, 2)
-        plt.plot(x_harris, y_harris, 'r.')
+        plt.imshow(linePointsPlot(self.rawPic, (x, y), PotType='dot'))
         plt.subplot(2, 2, 3)
-        plt.imshow(self.rawPic)
+        plt.imshow(linePointsPlot(self.rawPic, (x_c, y_c)))
         plt.subplot(2, 2, 4)
-        plt.imshow(self.processedPic,'gray')
+        plt.imshow(self.processedPic, 'gray')
         plt.show()
 
 
