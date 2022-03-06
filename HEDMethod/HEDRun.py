@@ -8,6 +8,8 @@ import PIL
 import PIL.Image
 import sys
 
+from PicTrans2HEDInput import PicTrans2HEDInput
+
 
 # end
 
@@ -176,7 +178,7 @@ def HEDDetectSave(pic: np.ndarray):
 # makes it available on terminal
 if __name__ == '__main__':
     arguments_strModel = 'bsds500'  # only 'bsds500' for now
-    arguments_strIn = '../images/sample.png'
+    arguments_strIn = '../images/draw.png'
     arguments_strOut = './out.png'
 
     ##########################################################
@@ -199,7 +201,7 @@ if __name__ == '__main__':
             arguments_strOut = strArgument  # path to where the output should
         # be stored
 
-    pic = numpy.array(PIL.Image.open(arguments_strIn))
+    pic = PicTrans2HEDInput(numpy.array(PIL.Image.open(arguments_strIn)))
     HEDDetectSave(pic)
     pass
 # end

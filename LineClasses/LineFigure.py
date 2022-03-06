@@ -16,7 +16,7 @@ def adpativeShow(inputs: list):
     return fig
 
 
-def eraseFrame(img: np.ndarray):
+def eraseFrame(img: np.ndarray) -> np.ndarray:
     if img.ndim > 2:
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     else:
@@ -92,6 +92,14 @@ def LinePointDetectCentralize(scrGray):
     return idx_x, idx_y, idx_x_sep, idx_y_sep
 
 
+def binPicCertification(pic: np.ndarray, gap=10000) -> bool:
+    if pic.ndim > 2:
+        raise ValueError("you should input a binary pic for certification")
+    hist_inner = cv2.calcHist([pic], [0], None, [2], [0, 256])
+    print(hist_inner)
+    return hist_inner[-1] > gap
+
+
 class LineFigure(object):
     @abc.abstractmethod
     @singledispatch
@@ -144,25 +152,28 @@ class LineFigure(object):
                 break
         return backgroundColor, lineColors
 
-    def TotalFilter(self, distance=20):
+    def TotalFilter(self, distance=10):
         b, g, r = cv2.split(self.rawPic)
         binPics = []
+
+        def BinPicNormalize(pic_in) -> bool:
+            hist_inner = cv2.calcHist([pic_in], [0], self.mask, [2], [0, 256])
+            return hist_inner[0] < hist_inner[-1]
+
         for pic, channel in zip((self.gray, b, g, r), range(-1, 3)):
             backClo, Clos = self.GetColorInterval(channel=channel)
             tempBin = None
             for Clo in Clos:
                 if tempBin is None:
-                    print(Clo - distance, Clo + int(distance))
                     tempBin = cv2.inRange(pic, int(Clo) - distance, int(Clo) + distance)
                 elif isinstance(tempBin, np.ndarray):
                     tempBin = cv2.bitwise_and(tempBin, cv2.inRange(pic, Clo - distance, Clo + distance))
                 else:
                     raise ValueError("cv2 cannot filter the pic by Clo:%d" % Clo)
             if tempBin is not None:
-                tempBin[tempBin == backClo] = 0
-                if backClo > 100:
+                if BinPicNormalize(tempBin):
                     tempBin = 255 - tempBin
-                binPics.append(tempBin)
+                binPics.append(cv2.bitwise_and(tempBin, self.mask))
             else:
                 raise ValueError("work undone, the tempBin still None")
         return binPics
@@ -175,27 +186,49 @@ class LineFigure(object):
         x = np.arange(0, 256)
         return hist_0, hist_1, hist_2, hist_gray, x
 
-    def imgOverlay(self):
+    def imgOverlay(self) -> np.ndarray:
+        result = None
         gray, b, g, r = self.TotalFilter()
-        return cv2.bitwise_or(b, cv2.bitwise_or(g, r))
+        thresPic = cv2.bitwise_and(
+            cv2.adaptiveThreshold(src=self.gray, maxValue=255, adaptiveMethod=cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+                                  thresholdType=cv2.THRESH_BINARY_INV, blockSize=11, C=12),
+            self.mask)
+
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (8, 5))
+        cannyPic = cv2.dilate(cv2.Canny(self.gray, threshold1=5, threshold2=5), kernel)
+        cannyPic = cv2.bitwise_and(cannyPic, self.mask)
+        for pic in [gray, b, g, r, thresPic, cannyPic]:
+            if binPicCertification(pic):
+                if result is None:
+                    result = pic
+                else:
+                    result = cv2.bitwise_and(result, pic)
+        if result is None:
+            raise ValueError("img overlay failed, with return None")
+        if ~binPicCertification(result, 20000):
+            result = cv2.dilate(result, kernel)
+        return result
 
     def main(self):
-        pic = self.gray
-        pic = cv2.bitwise_and(pic, pic, mask=self.mask)
         gray, b, g, r = self.TotalFilter()
-        plt.subplot(2, 2, 1)
-        plt.imshow(gray, 'gray')
-        plt.subplot(2, 2, 2)
-        plt.imshow(b, 'gray')
-        plt.subplot(2, 2, 3)
-        plt.imshow(g, 'gray')
-        plt.subplot(2, 2, 4)
-        plt.imshow(r, 'gray')
+        thresPic = cv2.bitwise_and(
+            cv2.adaptiveThreshold(src=self.gray, maxValue=255, adaptiveMethod=cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+                                  thresholdType=cv2.THRESH_BINARY_INV, blockSize=11, C=12),
+            self.mask)
+        cannyPic = cv2.bitwise_and(
+            cv2.Canny(self.gray, threshold1=5, threshold2=5),
+            self.mask)
+        pics = [gray, b, g, r, thresPic, cannyPic, self.rawPic, self.imgOverlay()]
+        plt.figure("1")
+        for i, pic in zip(range(1, len(pics) + 1), pics):
+            plt.subplot(3, 3, i)
+            plt.imshow(pic, 'gray')
         plt.show()
         pass
 
 
 if __name__ == '__main__':
-    for id in range(20, 100):
+    for id in range(32, 100):
+        print(id)
         LineFigure("../../data/img_train_BrokenLine/%d" % id, True)
     pass

@@ -11,7 +11,7 @@ def PicTrans2HEDInput(pic: np.ndarray, size=None) -> np.ndarray:
     matrix = np.float32([[width / rows, 0, 0],
                          [0, height / cols, 0],
                          [0, 0, 1]])
-    output = cv2.warpPerspective(pic, matrix, (width, height, 3))
+    output = cv2.warpPerspective(src=pic, M=matrix, dsize=(width, height))
     return output
 
 

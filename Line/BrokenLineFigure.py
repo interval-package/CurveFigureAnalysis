@@ -77,7 +77,6 @@ def main():
     plt.imshow(thresh_2, 'gray'), plt.axis("off")
     plt.show()
 
-
 if __name__ == '__main__':
     obj = BrokenLineFigure(5)
     obj.show()
