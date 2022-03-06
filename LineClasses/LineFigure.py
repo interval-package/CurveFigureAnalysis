@@ -31,57 +31,25 @@ def eraseFrame(img: np.ndarray) -> np.ndarray:
     return no_border
 
 
-# 读取文件
-def readLine(basicPath: str):
-    # 标准化读取图片信息
-    # print(basicPath + "/draw.png")
-    try:
-        rawpic = cv2.imread(basicPath + "/draw.png")
-        binarypic = cv2.imread(basicPath + "/draw_mask.png")
-        piclable = pd.read_table(basicPath + "/db.txt", engine='python', delimiter="\n")
-        return rawpic, binarypic, piclable
-    except IOError as IOe:
-        print('repr(IOe):\t', repr(IOe))
-        return np.array([]), np.array([]), []
-    except Exception as e:
-        print('repr(e):\t', repr(e))
-        return np.ndarray([]), np.ndarray([]), []
-
-
-# 由像素检测线上的点
-def LinePointDetectCentralize(scrGray):
-    # 提取线的中点坐标，将中点坐标输出
-    if scrGray.ndim > 2:
-        # if not gray, change into gray
-        scrGray = cv2.cvtColor(scrGray, cv2.COLOR_BGR2GRAY)
-    # 再次确认为二进制图片
-    scrGray = cv2.threshold(scrGray, 200, 255, cv2.THRESH_BINARY)[1]
-
-    # 这里进行了一次旋转，因为np.where的遍历是沿着行方向进行的
-    idx_x, idx_y = np.where(cv2.rotate(scrGray, cv2.ROTATE_90_CLOCKWISE, 90))
-
-    # 对x做一次差分，找出x有递增的点
-    dx = np.diff(idx_x)
-    # 获取递增点序号，并且在初始处插入一个0
-    x_stage = np.insert(np.where(dx), 0, 0)
-
-    # 现在1表示一串相同x的初始点
-    x_gap = np.diff(x_stage) + 1
-    x_gap = np.floor_divide(x_gap, 2)
-    x_gap = np.append(x_gap, 0)
-    x_ = x_gap + x_stage
-
-    try:
-        idx_x_sep = idx_x[x_]
-        idx_y_sep = idx_y[x_]
-    except IndexError:
-        idx_x_sep = idx_x
-        idx_y_sep = idx_y
-
-    return idx_x, idx_y, idx_x_sep, idx_y_sep
-
-
 class LineFigure(object):
+    # 读取文件
+    @staticmethod
+    def readLine(basicPath: str):
+        # 标准化读取图片信息
+        # print(basicPath + "/draw.png")
+        rawPic = cv2.imread(basicPath + "/draw.png")
+        if rawPic is None:
+            raise ValueError("invalid path")
+        try:
+            binary_pic = cv2.imread(basicPath + "/draw_mask.png")
+            pic_label = pd.read_table(basicPath + "/db.txt", engine='python', delimiter="\n")
+            return rawPic, binary_pic, pic_label
+        except IOError as IOe:
+            print('repr(IOe):\t', repr(IOe))
+        except Exception as e:
+            print('repr(e):\t', repr(e))
+        return rawPic, None, None
+
     @abc.abstractmethod
     def __init__(self, rawPic, givenPic=None, picLabel=None, testVersion=False):
         """
@@ -95,7 +63,7 @@ class LineFigure(object):
             raise TypeError("this method is dealt with np.ndarray get str instead, "
                             "please use the class Method @fromFile for str path ")
         self.testVersion = testVersion
-        self.rawPic, self.givePic, self.picLable = rawPic, givenPic, picLabel
+        self.rawPic, self.givePic, self.picLabel = rawPic, givenPic, picLabel
         self.mask = self.getMask()
 
         # preprocess, get blurred gray scale pic
@@ -113,12 +81,13 @@ class LineFigure(object):
         pass
 
     @classmethod
+    @abc.abstractmethod
     def fromFile(cls, basicPath: str, testVersion=False):
         """
         :parameter basicPath: the folder containing the pics
         :param testVersion: test or not
         """
-        rawPic, binaryPic, picLabel = readLine(basicPath)
+        rawPic, binaryPic, picLabel = LineFigure.readLine(basicPath)
         return cls(rawPic, binaryPic, picLabel, testVersion)
 
     @staticmethod
@@ -237,9 +206,7 @@ class LineFigure(object):
                     result = cv2.bitwise_and(result, pic)
         if result is None:
             raise ValueError("img overlay failed, with return None")
-        if ~self.binPicCertification(result, 20000):
-            kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (11, 1))
-            result = cv2.dilate(result, kernel)
+
         if self.processedPic is None:
             self.processedPic = result
         return result
@@ -249,10 +216,51 @@ class LineFigure(object):
             result = self.imgOverlay()
         else:
             result = self.processedPic
-        # kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
-        # result = cv2.morphologyEx(result, cv2.MORPH_CLOSE, kernel)
-        # result = cv2.morphologyEx(result, cv2.MORPH_OPEN, kernel)
+        # if ~self.binPicCertification(result, 20000):
+        #     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (11, 1))
+        #     result = cv2.dilate(result, kernel)
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+        result = cv2.morphologyEx(result, cv2.MORPH_CLOSE, kernel)
+        result = cv2.morphologyEx(result, cv2.MORPH_OPEN, kernel)
         return result
+
+    @staticmethod
+    def LinePointDetectCentralize(scrGray):
+        """
+        :param scrGray: bin pic
+        :return: x, y for the line
+        """
+        # 由像素检测线上的点
+        # 提取线的中点坐标，将中点坐标输出
+        if scrGray.ndim > 2:
+            # if not gray, change into gray
+            scrGray = cv2.cvtColor(scrGray, cv2.COLOR_BGR2GRAY)
+        # 再次确认为二进制图片
+        scrGray = cv2.threshold(scrGray, 200, 255, cv2.THRESH_BINARY)[1]
+
+        # 这里进行了一次旋转，因为np.where的遍历是沿着行方向进行的
+        idx_x, idx_y = np.where(cv2.rotate(scrGray, cv2.ROTATE_90_CLOCKWISE, 90))
+
+        # 对x做一次差分，找出x有递增的点
+        dx = np.diff(idx_x)
+        # 获取递增点序号，并且在初始处插入一个0
+        x_stage = np.insert(np.where(dx), 0, 0)
+
+        # 现在1表示一串相同x的初始点
+        x_gap = np.diff(x_stage) + 1
+        x_gap = np.floor_divide(x_gap, 2)
+        x_gap = np.append(x_gap, 0)
+        x_ = x_gap + x_stage
+
+        try:
+            idx_x_sep = idx_x[x_]
+            idx_y_sep = idx_y[x_]
+        except IndexError:
+            idx_x_sep = idx_x
+            idx_y_sep = idx_y
+
+        return idx_x, idx_y, idx_x_sep, idx_y_sep
+
 
     def main(self):
         gray, b, g, r = self.TotalFilter()

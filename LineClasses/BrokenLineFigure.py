@@ -33,7 +33,7 @@ def DetectPointHarrisMethod(src: np.ndarray, gap=0.01, mask=None, inplace=False)
         # src[x, y] = [0, 0, 255]
         for i in range(0, len(x) - 1):
             cv2.line(src, (x[i], y[i]), (x[i + 1], y[i + 1]), color=[0, 0, 255])
-    return [x, y], src, thresh
+    return x, y, src, thresh
 
 
 def DetectPointGoodFeatureMethod(src: np.ndarray, gap=0.01, maxCount=100, mask=None, inplace=False):
@@ -52,7 +52,7 @@ def DetectPointGoodFeatureMethod(src: np.ndarray, gap=0.01, maxCount=100, mask=N
     return corners
 
 
-def linePointsPlot(src, points, color=None):
+def linePointsPlot(src, points, color=None, PotType='line'):
     if color is None:
         color = [0, 0, 255]
     if isinstance(points, tuple):
@@ -62,27 +62,50 @@ def linePointsPlot(src, points, color=None):
         y = points[:, 1]
     else:
         raise ValueError("unfitted input")
-    for i in range(0, len(x) - 1):
-        cv2.line(src, (x[i], y[i]), (x[i + 1], y[i + 1]), color=color)
+    if PotType == 'line':
+        for i in range(0, len(x) - 1):
+            cv2.line(src, (x[i], y[i]), (x[i + 1], y[i + 1]), color=color)
+    else:
+        for i in range(0, len(x) - 1):
+            cv2.circle(src, (x[i], y[i]), 5, color=color)
     return src
 
 
 class BrokenLineFigure(LineFigure):
     @singledispatch
-    def __init__(self, id: int, test=False):
+    def __init__(self, rawPic, givenPic=None, picLabel=None, testVersion=False):
         # read in the pic into the obj
-        super().__init__("../../data/img_train_BrokenLine/%d" % id, test)
+        super().__init__(rawPic, givenPic, picLabel, testVersion)
         # super(BrokenLineFigure, self).__init__("../../data/img_train_BrokenLine/%d" % id, test)
         self.type = "BrokenLine"
+
+    @classmethod
+    def fromFile(cls, id: int, testVersion=False):
+        rawPic, givenPic, picLabel = super().readLine("../../data/img_train_BrokenLine/%d" % id)
+        return cls(rawPic, givenPic, picLabel, testVersion)
+
+    def getPoints(self):
+        if self.processedPic is not None:
+            pic = self.processedPic
+        else:
+            pic = self.smoothOutput()
+        # 中心法获取图像点
+        _, _, x_c, y_c = LineFigure.LinePointDetectCentralize(pic)
+        # Harris角点检测
+        x_harris, y_harris, _, _ = DetectPointHarrisMethod(pic)
+        plt.subplot(2, 2, 1)
+        plt.plot(x_c, y_c, 'g')
+        plt.subplot(2, 2, 2)
+        plt.plot(x_harris, y_harris, 'r.')
+        plt.subplot(2, 2, 3)
+        plt.imshow(self.rawPic)
+        plt.subplot(2, 2, 4)
+        plt.imshow(self.processedPic,'gray')
+        plt.show()
 
 
 if __name__ == '__main__':
     for i in range(20, 30):
-        obj = BrokenLineFigure(i)
-        [x, y], src, thresh = DetectPointHarrisMethod(obj.rawPic, mask=obj.getMask(), inplace=True)
-        plt.subplot(1, 2, 1)
-        plt.imshow(src)
-        plt.subplot(1, 2, 2)
-        plt.imshow(thresh, 'gray')
-        plt.show()
+        obj = BrokenLineFigure.fromFile(i)
+        obj.getPoints()
     pass
