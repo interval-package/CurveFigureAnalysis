@@ -63,8 +63,6 @@ def linePointsPlot(src, points, color=None):
         x = points[:, 0]
         y = points[:, 1]
     else:
-        x = []
-        y = []
         raise ValueError("unfitted input")
     for i in range(0, len(x) - 1):
         cv2.line(src, (x[i], y[i]), (x[i + 1], y[i + 1]), color=color)
@@ -78,11 +76,6 @@ class BrokenLineFigure(LineFigure):
         super().__init__("../../data/img_train_BrokenLine/%d" % id, test)
         # super(BrokenLineFigure, self).__init__("../../data/img_train_BrokenLine/%d" % id, test)
         self.type = "BrokenLine"
-
-    # @__init__.register(np.ndarray)
-    # def __init__(self, pic: np.ndarray, test=False):
-    #     super(BrokenLineFigure, self).__init__(pic, test)
-    #     self.type = "BrokenLine"
 
 
 if __name__ == '__main__':

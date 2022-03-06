@@ -92,6 +92,7 @@ def LinePointDetectCentralize(scrGray):
     return idx_x, idx_y, idx_x_sep, idx_y_sep
 
 
+# 图像有效性验证，如果图像内部为真的像素点过少，则验证失败
 def binPicCertification(pic: np.ndarray, gap=10000) -> bool:
     if pic.ndim > 2:
         raise ValueError("you should input a binary pic for certification")
@@ -102,11 +103,10 @@ def binPicCertification(pic: np.ndarray, gap=10000) -> bool:
 
 class LineFigure(object):
     @abc.abstractmethod
-    @singledispatch
-    def __init__(self, basicPath: str, testVersion=False):
+    def __init__(self, rawPic, picLable=None, givePic=None, testVersion=False):
         # testVersion：是否以测试模式构建对象
         self.testVersion = testVersion
-        self.rawPic, self.binaryPic, self.picLable = readLine(basicPath)
+        self.rawPic, self.binaryPic, self.picLable = rawPic, picLable, givePic
         self.mask = self.getMask()
 
         # preprocess, get blurred gray scale pic
@@ -121,13 +121,30 @@ class LineFigure(object):
             self.main()
         pass
 
-    def getMask(self):
+    @classmethod
+    def fromFile(cls, basicPath: str, testVersion=False):
+        """
+        :parameter basicPath: the folder containing the pics
+        :param testVersion: test or not
+        """
+        rawPic, binaryPic, picLable = readLine(basicPath)
+        return cls(rawPic, binaryPic, picLable, testVersion)
+
+    def getMask(self) -> np.ndarray:
+        """
+        :return 通过设定的预期值获取最基本的蒙版
+        """
         rows, cols = self.rawPic.shape[:2]
         maskArea = np.zeros([rows, cols], dtype=np.uint8)
         maskArea[int(rows / 7):int(7 * rows / 8), int(cols / 8) + 1:int(8 * cols / 9) + 7] = 255
         return maskArea
 
     def GetColorInterval(self, channel=0, LineCloNums=2, distance=20):
+        """
+        @:parameter channel: filter the target channel color, -1 is the gray
+        @:parameter LineCloNums: nums of valid colors
+        @:parameter distance:　the linClo must be different from backGround Clo, the least Clo distance between
+        """
         # 对采样图像，进行颜色分析
         src = cv2.GaussianBlur(self.rawPic, (3, 3), 0)
         if channel < 0:
@@ -153,9 +170,15 @@ class LineFigure(object):
         return backgroundColor, lineColors
 
     def TotalFilter(self, distance=10):
+        """
+        :parameter distance:　for each filtered clo we define a gap for each to in range
+        :return extraction of three Channel plus gray figure
+        """
+        # 对三个色道，以及灰度的图片进行基于色值分布曲线的提取
         b, g, r = cv2.split(self.rawPic)
         binPics = []
 
+        # 将图片标准化，白色背景的图片将会返回True，由后续反转颜色
         def BinPicNormalize(pic_in) -> bool:
             hist_inner = cv2.calcHist([pic_in], [0], self.mask, [2], [0, 256])
             return hist_inner[0] < hist_inner[-1]
@@ -163,15 +186,18 @@ class LineFigure(object):
         for pic, channel in zip((self.gray, b, g, r), range(-1, 3)):
             backClo, Clos = self.GetColorInterval(channel=channel)
             tempBin = None
+            # 色彩分析会得到多种颜色，对每一种颜色进行筛选
             for Clo in Clos:
                 if tempBin is None:
                     tempBin = cv2.inRange(pic, int(Clo) - distance, int(Clo) + distance)
                 elif isinstance(tempBin, np.ndarray):
+                    # 将每一种颜色筛选结果进行合并
                     tempBin = cv2.bitwise_and(tempBin, cv2.inRange(pic, Clo - distance, Clo + distance))
                 else:
                     raise ValueError("cv2 cannot filter the pic by Clo:%d" % Clo)
             if tempBin is not None:
                 if BinPicNormalize(tempBin):
+                    # 反转颜色
                     tempBin = 255 - tempBin
                 binPics.append(cv2.bitwise_and(tempBin, self.mask))
             else:
