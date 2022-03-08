@@ -92,6 +92,15 @@ class BrokenLineFigure(LineFigure):
         rawPic, givenPic, picLabel = super().readLine("../../data/img_train_BrokenLine/%d" % id)
         return cls(rawPic, givenPic, picLabel, testVersion)
 
+    def TurningPointGet(self):
+        if self.processedPic is not None:
+            pic = self.processedPic
+        else:
+            pic = self.smoothOutput()
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+        pic = cv2.morphologyEx(pic, cv2.MORPH_BLACKHAT, kernel)
+        return pic
+
     def getPoints(self):
         if self.processedPic is not None:
             pic = self.processedPic
@@ -102,7 +111,8 @@ class BrokenLineFigure(LineFigure):
         # Harris角点检测
         x_harris, y_harris, _, _ = DetectPointHarrisMethod(pic)
         plt.subplot(2, 2, 1)
-        plt.plot(x_c, y_c, 'g')
+        # plt.plot(x_c, y_c, 'g')
+        plt.imshow(self.TurningPointGet())
         plt.subplot(2, 2, 2)
         plt.imshow(linePointsPlot(self.rawPic, (x, y), PotType='dot'))
         plt.subplot(2, 2, 3)

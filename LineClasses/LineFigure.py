@@ -217,9 +217,8 @@ class LineFigure(object):
         else:
             result = self.processedPic
         # if ~self.binPicCertification(result, 20000):
-        #     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (11, 1))
-        #     result = cv2.dilate(result, kernel)
-        # kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (7, 7))
+        result = cv2.dilate(result, kernel)
         # result = cv2.morphologyEx(result, cv2.MORPH_CLOSE, kernel)
         # result = cv2.morphologyEx(result, cv2.MORPH_OPEN, kernel)
         return result
@@ -239,7 +238,7 @@ class LineFigure(object):
         scrGray = cv2.threshold(scrGray, 200, 255, cv2.THRESH_BINARY)[1]
 
         # 这里进行了一次旋转，因为np.where的遍历是沿着行方向进行的
-        idx_x, idx_y = np.where(cv2.flip(scrGray, 0))
+        idx_x, idx_y = np.where(cv2.rotate(scrGray, cv2.ROTATE_90_CLOCKWISE, 90))
 
         # 对x做一次差分，找出x有递增的点
         dx = np.diff(idx_x)
