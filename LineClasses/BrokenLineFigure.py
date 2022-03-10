@@ -52,7 +52,7 @@ def DetectPointGoodFeatureMethod(src: np.ndarray, gap=0.01, maxCount=100, mask=N
     return corners
 
 
-def linePointsPlot(src, points, color=None, PotType='line'):
+def LinePointsPlot(src, points, color=None, PotType='line'):
     if color is None:
         color = [125, 125, 125]
     if isinstance(points, tuple):
@@ -114,9 +114,9 @@ class BrokenLineFigure(LineFigure):
         # plt.plot(x_c, y_c, 'g')
         plt.imshow(self.TurningPointGet())
         plt.subplot(2, 2, 2)
-        plt.imshow(linePointsPlot(self.rawPic, (x, y), PotType='dot'))
+        plt.imshow(LinePointsPlot(self.rawPic, (x, y), PotType='dot'))
         plt.subplot(2, 2, 3)
-        plt.imshow(linePointsPlot(self.rawPic, (x_c, y_c)))
+        plt.imshow(LinePointsPlot(self.rawPic, (x_c, y_c)))
         plt.subplot(2, 2, 4)
         plt.imshow(self.processedPic, 'gray')
         plt.show()

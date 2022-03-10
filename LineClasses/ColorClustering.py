@@ -19,53 +19,11 @@ def movePic(pic, x=0, y=0):
     return res
 
 
-class ColorCluster(object):
-    def __init__(self, pic: np.ndarray, mask=None):
-        self.pic = pic
-        if mask is None:
-            self.mask = GetMaskSimple(self.pic)
-        else:
-            self.mask = mask
-        pass
-
-    def CalcSelf(self):
-        gray = cv2.cvtColor(self.pic, cv2.COLOR_BGR2GRAY)
-        hist_0 = cv2.calcHist([self.pic], [0], self.mask, [256], [0, 255]).reshape(256)  # open distinct
-        hist_1 = cv2.calcHist([self.pic], [1], self.mask, [256], [0, 255]).reshape(256)
-        hist_2 = cv2.calcHist([self.pic], [2], self.mask, [256], [0, 255]).reshape(256)
-        hist_gray = cv2.calcHist([gray], [0], self.mask, [256], [0, 255]).reshape(256)
-        x = np.arange(0, 256)
-        return hist_0, hist_1, hist_2, hist_gray, x
-
-    def show(self):
-        fig = plt.figure()
-        hist_0, hist_1, hist_2, hist_gray, x = self.CalcSelf()
-        plt.subplot(2, 2, 1), plt.bar(x=x[hist_0 > 0], height=hist_0[hist_0 > 0], color="b"), plt.title(
-            "color hist b")
-        plt.subplot(2, 2, 2), plt.bar(x[hist_1 > 0], hist_1[hist_1 > 0], color="g"), plt.title(
-            "color hist g")
-        plt.subplot(2, 2, 3), plt.bar(x[hist_2 > 0], hist_2[hist_2 > 0], color="r"), plt.title(
-            "color hist r")
-        plt.subplot(2, 2, 4), plt.bar(x[hist_gray > 0], hist_gray[hist_gray > 0]), plt.title(
-            "color hist gray")
-        return fig
+class ClusteringNode(object):
 
 
-def main(id):
-    src = cv2.imread("../../data/img_train_BrokenLine/%d/draw.png" % id)
-    rows, cols, canals = src.shape
-    maskpic_target = cv2.imread("../../data/img_train_BrokenLine/%d/draw_mask.png" % id)
-    maskpic_target = cv2.cvtColor(maskpic_target, cv2.COLOR_BGR2GRAY)
-    maskpic_target = cv2.threshold(maskpic_target, 10, 255, cv2.THRESH_BINARY, 1)[1]
-    # maskpic_target[int(0.4 * rows):int(0.6 * rows), int(0.4 * cols):int(0.6 * cols)] = 255
-    maskpic_target = movePic(maskpic_target, -3, -1)
-
-    ColorCluster(src).show()
-    ColorCluster(src, maskpic_target).show()
-    plt.show()
 
 
 if __name__ == '__main__':
-    for i in range(1, 100):
-        main(i)
+
     pass
