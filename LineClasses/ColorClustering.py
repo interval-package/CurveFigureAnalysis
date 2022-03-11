@@ -64,24 +64,24 @@ def GetColorBoundary(pic):
 
 
 class ClusteringNode(object):
-    def __init__(self, pic: np.ndarray, mask, objType="training"):
+    def __init__(self, pic: np.ndarray, mask=None, tar=None):
         """
         @:param pic:should be the BGR version(the opencv default), we will change it into HSv
         @:param objType: should be training or test, but actually if not training we all recognize as the test
         """
         pic = cv2.cvtColor(pic, cv2.COLOR_BGR2HSV)
-        self.vector = cv2.calcHist(pic, [0, 1, 2], self.getSimpleMask(pic), [8, 8, 8],
+        if mask is None:
+            mask = self.getSimpleMask(pic)
+        self.vector = cv2.calcHist(pic, [0, 1, 2], mask, [8, 8, 8],
                                    [0, 256, 0, 256, 0, 256]).flatten()
-        if objType != 'training':
-            self.tar = cv2.calcHist(pic, [0, 1, 2], mask, [8, 8, 8], [0, 256, 0, 256, 0, 256]).flatten()
 
     @classmethod
-    def fromFileIdTrain(cls,id):
+    def fromFileIdTrain(cls, id):
 
         return cls
 
     @classmethod
-    def fromFileIdTest(cls,id):
+    def fromFileIdTest(cls, id):
         return cls
 
     @staticmethod
@@ -99,6 +99,24 @@ class ClusteringNode(object):
 
     def __len__(self):
         return self.vector.shape[1]
+
+
+class ClusteringDataset(object):
+    def __init__(self,dataPath,dataCounts=None,readingType='training'):
+        if dataCounts is None:
+            if readingType=='training':
+                self.counts = 1400
+            else:
+                self.counts = 1000
+        else:
+            self.counts = dataCounts
+        pass
+
+    def __getitem__(self, item):
+        return
+
+    def __len__(self):
+        return self.counts
 
 
 if __name__ == '__main__':

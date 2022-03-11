@@ -3,32 +3,7 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-
-
-def eraseFrame(img: np.ndarray) -> np.ndarray:
-    if img.ndim > 2:
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    else:
-        gray = img
-    ret, binary = cv2.threshold(gray, 200, 255, 0)
-    # assuming, b_w is the binary image
-    inv = 255 - binary
-    horizontal_img = inv
-    vertical_img = inv
-
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (100, 1))
-    horizontal_img = cv2.erode(horizontal_img, kernel, iterations=1)
-    horizontal_img = cv2.dilate(horizontal_img, kernel, iterations=1)
-
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, 100))
-    vertical_img = cv2.erode(vertical_img, kernel, iterations=1)
-    vertical_img = cv2.dilate(vertical_img, kernel, iterations=1)
-
-    mask_img = horizontal_img + vertical_img
-    # no_border = np.bitwise_or(binary, mask_img)
-    no_border = cv2.bitwise_or(binary, mask_img)
-
-    return no_border
+from PointDetector import *
 
 
 class LineFigure(object):
@@ -222,43 +197,6 @@ class LineFigure(object):
         # result = cv2.morphologyEx(result, cv2.MORPH_CLOSE, kernel)
         # result = cv2.morphologyEx(result, cv2.MORPH_OPEN, kernel)
         return result
-
-    @staticmethod
-    def LinePointDetectCentralize(scrGray):
-        """
-        @:param scrGray: bin pic
-        :return: x, y for the line
-        """
-        # 由像素检测线上的点
-        # 提取线的中点坐标，将中点坐标输出
-        if scrGray.ndim > 2:
-            # if not gray, change into gray
-            scrGray = cv2.cvtColor(scrGray, cv2.COLOR_BGR2GRAY)
-        # 再次确认为二进制图片
-        scrGray = cv2.threshold(scrGray, 200, 255, cv2.THRESH_BINARY)[1]
-
-        # 这里进行了一次旋转，因为np.where的遍历是沿着行方向进行的
-        idx_x, idx_y = np.where(cv2.rotate(scrGray, cv2.ROTATE_90_CLOCKWISE, 90))
-
-        # 对x做一次差分，找出x有递增的点
-        dx = np.diff(idx_x)
-        # 获取递增点序号，并且在初始处插入一个0
-        x_stage = np.insert(np.where(dx), 0, 0)
-
-        # 现在1表示一串相同x的初始点
-        x_gap = np.diff(x_stage) + 1
-        x_gap = np.floor_divide(x_gap, 2)
-        x_gap = np.append(x_gap, 0)
-        x_ = x_gap + x_stage
-
-        try:
-            idx_x_sep = idx_x[x_]
-            idx_y_sep = idx_y[x_]
-        except IndexError:
-            idx_x_sep = idx_x
-            idx_y_sep = idx_y
-
-        return idx_x, idx_y, idx_x_sep, idx_y_sep
 
     def main(self):
         gray, b, g, r = self.TotalFilter()
