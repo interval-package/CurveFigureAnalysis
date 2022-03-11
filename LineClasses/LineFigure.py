@@ -145,8 +145,8 @@ class LineFigure(object):
 
     def TotalFilter(self, distance=10):
         """
-        :param distance:　for each filtered clo we define a gap for each to in range
-        :return extraction of three Channel plus gray figure
+        @:param distance:　for each filtered clo we define a gap for each to in range
+        @:return extraction of three Channel plus gray figure
         """
         # 对三个色道，以及灰度的图片进行基于色值分布曲线的提取
         b, g, r = cv2.split(self.rawPic)
@@ -226,7 +226,7 @@ class LineFigure(object):
     @staticmethod
     def LinePointDetectCentralize(scrGray):
         """
-        :param scrGray: bin pic
+        @:param scrGray: bin pic
         :return: x, y for the line
         """
         # 由像素检测线上的点
