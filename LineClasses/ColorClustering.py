@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider
 
+
 def movePic(pic, x=0, y=0):
     mat = np.float32([[1, 0, x], [0, 1, y]])
     rows, cols = pic.shape[0:2]
@@ -20,17 +21,47 @@ def GetColorBoundary(pic):
         res = cv2.inRange(pic, (h_l, s_l, v_l), (h_h, s_h, v_h))
         return res
 
-    figrue = plt.imshow(pic)
+    fig, ax = plt.subplots()
+    ax.imshow(pic)
+    plt.subplots_adjust(bottom=0.3)
 
-    axamp = plt.axes([0.1, 0.25, 0.0225, 0.63])
-    amp_slider = Slider(
-        ax=axamp,
-        label="Amplitude",
+    axFilter_1 = plt.axes([0.1, 0.25, 0.0225, 0.63])
+    axFilter_2 = plt.axes([0.25, 0.40, 0.0225, 0.63])
+    slider_1 = Slider(
+        ax=axFilter_1,
+        label="up",
         valmin=0,
         valmax=255,
-        valinit=init_amplitude,
+        valinit=125,
         orientation="vertical"
     )
+    slider_2 = Slider(
+        ax=axFilter_2,
+        label="down",
+        valmin=0,
+        valmax=255,
+        valinit=125,
+        orientation="vertical"
+    )
+
+    def update(val):
+        up = slider_1.val
+        down = slider_2.val
+        if down > up:
+            temp = down
+            down = up
+            up = temp
+        ax.clear()
+        ax.imshow(cv2.inRange(pic, down, up))
+        fig.canvas.draw_idle()
+
+    axFilter_1.on_change(update)
+    axFilter_2.on_change(update)
+
+    plt.show()
+
+    return slider_1.val, slider_2.val
+
 
 class ClusteringNode(object):
     def __init__(self, pic: np.ndarray, mask, objType="training"):
@@ -43,6 +74,15 @@ class ClusteringNode(object):
                                    [0, 256, 0, 256, 0, 256]).flatten()
         if objType != 'training':
             self.tar = cv2.calcHist(pic, [0, 1, 2], mask, [8, 8, 8], [0, 256, 0, 256, 0, 256]).flatten()
+
+    @classmethod
+    def fromFileIdTrain(cls,id):
+
+        return cls
+
+    @classmethod
+    def fromFileIdTest(cls,id):
+        return cls
 
     @staticmethod
     def getSimpleMask(pic):
