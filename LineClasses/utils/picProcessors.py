@@ -12,7 +12,10 @@ def readLine(basicPath: str):
         raise ValueError("invalid path")
     try:
         binary_pic = cv2.imread(basicPath + "/draw_mask.png")
-        pic_label = pd.read_table(basicPath + "/db.txt", engine='python', delimiter="\n")
+        # pic_label = pd.read_table(basicPath + "/db.txt", engine='python', delimiter="\n")
+        with open(basicPath + "/db.txt") as f:
+            # w, h = [int(x) for x in next(f).split()]
+            pic_label = [[float(x) for x in line.split(',')] for line in f]
         return rawPic, binary_pic, pic_label
     except IOError as IOe:
         print('repr(IOe):\t', repr(IOe))

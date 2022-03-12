@@ -1,5 +1,8 @@
 import cv2
 import numpy as np
+import csv
+
+import pandas as pd
 from scipy.signal import find_peaks, butter, filtfilt
 
 
@@ -100,13 +103,6 @@ def DetectPointHarrisMethod(src: np.ndarray, gap=0.01, mask=None, inplace=False)
     else:
         img = src.copy()
 
-    # imgBlur = cv2.GaussianBlur(img, (5, 5), 1)  # ADD GAUSSIAN BLUR
-    # kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 3))
-    # img = cv2.erode(imgCanny, kernel, iterations=2)
-    # img = cv2.dilate(img, kernel, iterations=2)
-    # thresh = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11,
-    #                                2)  # 自适应阈值化
-
     # 设置蒙版
     thresh = cv2.add(img, np.zeros(np.shape(img), dtype=np.uint8), mask=mask)
 
@@ -135,7 +131,7 @@ def DetectPointGoodFeatureMethod(src: np.ndarray, gap=0.01, maxCount=100, mask=N
     corners = corners[np.argsort(corners[:, 0]), :]
     if inplace:
         for i in range(0, corners.shape[0] - 1):
-            print((corners[i][1], corners[i][0]), (corners[i + 1][1], corners[i + 1][0]))
+            # print((corners[i][1], corners[i][0]), (corners[i + 1][1], corners[i + 1][0]))
             cv2.line(src, (corners[i][0], corners[i][1]), (corners[i + 1][0], corners[i + 1][1]), color=[0, 255, 0])
     return corners
 
@@ -153,7 +149,7 @@ class PointDetector(object):
 
     @classmethod
     def FromBinPic(cls, pic, detectFun=LinePointDetectCentralize):
-        if pic.ndims > 2:
+        if pic.ndim > 2:
             raise ValueError("the input should be a bin Pic")
         obj = detectFun(pic)
         length = len(obj)
@@ -177,6 +173,19 @@ class PointDetector(object):
         :return: this function will change the points within, and return the changed
         """
         return
+
+    def Output2CSV(self, path='./PointsOutput.cvs'):
+        with open(path, 'w') as f:
+            writer = csv.writer(f)
+            # write a row to the csv file
+            for row in [self.x, self.y]:
+                writer.writerow(row)
+        pass
+
+    def Output2Excel(self, path='./PointsOutput.xls'):
+        with open(path) as f:
+            pd.DataFrame(data=[self.x, self.y], columns=['x', 'y']).to_excel(f)
+        pass
 
     def __len__(self):
         return len(self.x)

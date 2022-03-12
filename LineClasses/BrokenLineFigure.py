@@ -12,8 +12,9 @@ class BrokenLineFigure(LineFigure):
         super().__init__(rawPic, givenPic, picLabel, testVersion)
         # super(BrokenLineFigure, self).__init__("../../data/img_train_BrokenLine/%d" % id, test)
         self.type = "BrokenLine"
-        # 待定
-        self.points = PointDetector.FromBinPic(self.smoothOutput())
+        # 待定，可能使用PointDetector作为基类
+        self.pointsObj = PointDetector.FromBinPic(self.smoothOutput())
+        # 最好的目标是，折线图最后提取出来是一组点坐标
 
     @classmethod
     def fromFile(cls, id: int, testVersion=False):
@@ -44,7 +45,7 @@ class BrokenLineFigure(LineFigure):
         plt.subplot(2, 2, 2)
         plt.imshow(LinePointsPlot(self.rawPic, (x, y), PotType='dot'))
         plt.subplot(2, 2, 3)
-        plt.imshow(LinePointsPlot(self.rawPic, (x_c, y_c)))
+        plt.imshow(LinePointsPlot(self.rawPic, (x_c, y_c), PotType='dot'))
         plt.subplot(2, 2, 4)
         plt.imshow(pic, 'gray')
         plt.show()

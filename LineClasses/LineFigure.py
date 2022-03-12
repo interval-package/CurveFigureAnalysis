@@ -60,7 +60,7 @@ class LineFigure(object):
         if pic.ndim > 2:
             raise ValueError("you should input a binary pic for certification")
         hist_inner = cv2.calcHist([pic], [0], None, [2], [0, 256])
-        print(hist_inner)
+        # print(hist_inner)
         return hist_inner[-1] > gap
 
     def getMask(self) -> np.ndarray:

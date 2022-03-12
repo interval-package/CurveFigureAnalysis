@@ -8,15 +8,20 @@ For example
 #### (2)return the functions or points of the figure.
 #### (3)figure extraction.
 ## 3.tech used
-### basic introduce
+### (1)basic introduce of figure extraction
 We use three techs to detect the figure,for different compute power
-#### (1)Using traditional color divide method
+#### 1)Using traditional color divide method
 Basically we calc the color info and decide which color is the line color.
-<img src="">
+
+<img src="./images/sample.png"/>
+
 And through canny and sobel method we also get the processed pic.
 Finally, we judge the quality of several pic, and return.
-#### (2)Using machine learn the filter color
-#### (3)Using HED to detect the edge
+#### 2)Using machine learn the filter color
+#### 3)Using HED to detect the edge
+### (2)Points extraction
+#### 1)scipy.signal process
+We assume that our curve is a signal, and using the low filter to smooth the curve.
 ## 4.tutorial
 #### (1)Using python API
     from LineFigure import LineFgure
@@ -27,4 +32,5 @@ BrokenLineFigure and CurveFigure for more detail process
 #### (2)Using website
 We build a website for 
 ## 5.Acknowledgement
-#### contact us via e-mail: 8203200527@csu.edu.cn
+#### For more
+contact us via e-mail: 8203200527@csu.edu.cn

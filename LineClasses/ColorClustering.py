@@ -109,10 +109,14 @@ class ClusteringDataset(object):
                 self.counts = 1000
         else:
             self.counts = dataCounts
+        self.currentID = 0
         pass
 
     def __getitem__(self, item):
         return
+
+    def __next__(self):
+        return None
 
     def __len__(self):
         return self.counts
