@@ -1,5 +1,24 @@
 import cv2
 import numpy as np
+import pandas as pd
+
+
+# 读取文件
+def readLine(basicPath: str):
+    # 标准化读取图片信息
+    # print(basicPath + "/draw.png")
+    rawPic = cv2.imread(basicPath + "/draw.png")
+    if rawPic is None:
+        raise ValueError("invalid path")
+    try:
+        binary_pic = cv2.imread(basicPath + "/draw_mask.png")
+        pic_label = pd.read_table(basicPath + "/db.txt", engine='python', delimiter="\n")
+        return rawPic, binary_pic, pic_label
+    except IOError as IOe:
+        print('repr(IOe):\t', repr(IOe))
+    except Exception as e:
+        print('repr(e):\t', repr(e))
+    return rawPic, None, None
 
 
 def eraseFrame(img: np.ndarray) -> np.ndarray:

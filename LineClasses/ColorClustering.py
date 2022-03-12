@@ -77,7 +77,6 @@ class ClusteringNode(object):
 
     @classmethod
     def fromFileIdTrain(cls, id):
-
         return cls
 
     @classmethod
@@ -102,9 +101,9 @@ class ClusteringNode(object):
 
 
 class ClusteringDataset(object):
-    def __init__(self,dataPath,dataCounts=None,readingType='training'):
+    def __init__(self, dataPath, dataCounts=None, readingType='training'):
         if dataCounts is None:
-            if readingType=='training':
+            if readingType == 'training':
                 self.counts = 1400
             else:
                 self.counts = 1000

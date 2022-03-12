@@ -12,10 +12,12 @@ class BrokenLineFigure(LineFigure):
         super().__init__(rawPic, givenPic, picLabel, testVersion)
         # super(BrokenLineFigure, self).__init__("../../data/img_train_BrokenLine/%d" % id, test)
         self.type = "BrokenLine"
+        # 待定
+        self.points = PointDetector.FromBinPic(self.smoothOutput())
 
     @classmethod
     def fromFile(cls, id: int, testVersion=False):
-        rawPic, givenPic, picLabel = super().readLine("../../data/img_train_BrokenLine/%d" % id)
+        rawPic, givenPic, picLabel = readLine("../../data/img_train_BrokenLine/%d" % id)
         return cls(rawPic, givenPic, picLabel, testVersion)
 
     def TurningPointGet(self):
@@ -33,18 +35,18 @@ class BrokenLineFigure(LineFigure):
         else:
             pic = self.smoothOutput()
         # 中心法获取图像点
-        x, y, x_c, y_c = LineFigure.LinePointDetectCentralize(pic)
+        x, y, x_c, y_c = LinePointDetectCentralize(pic)
         # Harris角点检测
         x_harris, y_harris, _, _ = DetectPointHarrisMethod(pic)
         plt.subplot(2, 2, 1)
         # plt.plot(x_c, y_c, 'g')
         plt.imshow(self.TurningPointGet())
         plt.subplot(2, 2, 2)
-        plt.imshow(self.LinePointsPlot(self.rawPic, (x, y), PotType='dot'))
+        plt.imshow(LinePointsPlot(self.rawPic, (x, y), PotType='dot'))
         plt.subplot(2, 2, 3)
-        plt.imshow(self.LinePointsPlot(self.rawPic, (x_c, y_c)))
+        plt.imshow(LinePointsPlot(self.rawPic, (x_c, y_c)))
         plt.subplot(2, 2, 4)
-        plt.imshow(self.processedPic, 'gray')
+        plt.imshow(pic, 'gray')
         plt.show()
 
 

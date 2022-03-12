@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from scipy.signal import find_peaks
+from scipy.signal import find_peaks, butter, filtfilt
 
 
 def LinePointDetectCentralize(scrGray):
@@ -45,6 +45,7 @@ def LinePointDetectCentralizeAmplified(pic):
     :param pic: bin pic
     :return:
     using peaks to better fit the output
+    对于原来的中间点算法，在强拐点的时候，很容易产生粘合，导致拐点处的中间值过低，这里进行修正
     """
     # 对于原来的中间点算法，在强拐点的时候，很容易产生粘合，导致拐点处的中间值过低，这里进行修正
     if pic.ndims > 2:
@@ -57,6 +58,12 @@ def LinePointDetectCentralizeAmplified(pic):
     # 将峰值所对应的x提取出来，将其周围一圈替换为原来的最高值或者最低值
 
     return
+
+
+def LineLowFreqFilter(y):
+    pack = butter(8, 0.02, btype='low', output='ba')
+    Data = filtfilt(pack[0], pack[1], y)  # data为要过滤的信号
+    return Data
 
 
 def LinePointsPlot(src, points, color=None, PotType='line'):
@@ -159,10 +166,14 @@ class PointDetector(object):
 
     def PointsTrans(self, x=0, y=0, scale_x=None, scale_y=None):
         """
+        parameters
+        ==============
         :param x: move the points on the x-axis
         :param y: move the points on the y-axis
         :param scale_x:
         :param scale_y:
+        :returns
+        ==============
         :return: this function will change the points within, and return the changed
         """
         return

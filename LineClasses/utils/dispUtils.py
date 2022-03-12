@@ -2,7 +2,7 @@ import math
 from matplotlib import pyplot as plt
 
 
-def adpativeShow(inputs: list):
+def AdaptiveShow(inputs: list):
     l = len(inputs)
     n = math.ceil(math.sqrt(l))
     fig = plt.figure("compiled show")

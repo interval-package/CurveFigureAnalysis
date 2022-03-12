@@ -4,26 +4,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from PointDetector import *
+from utils.picProcessors import readLine
 
 
 class LineFigure(object):
-    # 读取文件
-    @staticmethod
-    def readLine(basicPath: str):
-        # 标准化读取图片信息
-        # print(basicPath + "/draw.png")
-        rawPic = cv2.imread(basicPath + "/draw.png")
-        if rawPic is None:
-            raise ValueError("invalid path")
-        try:
-            binary_pic = cv2.imread(basicPath + "/draw_mask.png")
-            pic_label = pd.read_table(basicPath + "/db.txt", engine='python', delimiter="\n")
-            return rawPic, binary_pic, pic_label
-        except IOError as IOe:
-            print('repr(IOe):\t', repr(IOe))
-        except Exception as e:
-            print('repr(e):\t', repr(e))
-        return rawPic, None, None
 
     @abc.abstractmethod
     def __init__(self, rawPic, givenPic=None, picLabel=None, testVersion=False):
@@ -59,10 +43,10 @@ class LineFigure(object):
     @abc.abstractmethod
     def fromFile(cls, basicPath: str, testVersion=False):
         """
-        :parameter basicPath: the folder containing the pics
+        :param basicPath: the folder containing the pics
         :param testVersion: test or not
         """
-        rawPic, binaryPic, picLabel = LineFigure.readLine(basicPath)
+        rawPic, binaryPic, picLabel = readLine(basicPath)
         return cls(rawPic, binaryPic, picLabel, testVersion)
 
     @staticmethod
@@ -90,9 +74,10 @@ class LineFigure(object):
 
     def GetColorInterval(self, channel=0, LineCloNums=2, distance=20):
         """
-        @:parameter channel: filter the target channel color, -1 is the gray
-        @:parameter LineCloNums: nums of valid colors
-        @:parameter distance:　the linClo must be different from backGround Clo, the least Clo distance between
+        对采样图像，进行颜色分析
+        :param channel: filter the target channel color, -1 is the gray
+        :param LineCloNums: nums of valid colors
+        :param distance:　the linClo must be different from backGround Clo, the least Clo distance between
         """
         # 对采样图像，进行颜色分析
         src = cv2.GaussianBlur(self.rawPic, (3, 3), 0)
@@ -120,8 +105,9 @@ class LineFigure(object):
 
     def TotalFilter(self, distance=10):
         """
-        @:param distance:　for each filtered clo we define a gap for each to in range
-        @:return extraction of three Channel plus gray figure
+        对三个色道，以及灰度的图片进行基于色值分布曲线的提取
+        :param distance:　for each filtered clo we define a gap for each to in range
+        :return :extraction of three Channel plus gray figure
         """
         # 对三个色道，以及灰度的图片进行基于色值分布曲线的提取
         b, g, r = cv2.split(self.rawPic)
