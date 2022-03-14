@@ -287,5 +287,5 @@ def main_3(id):
 
 if __name__ == '__main__':
     for i in range(25, 50):
-        main_3(i)
+        main_2(i)
     pass

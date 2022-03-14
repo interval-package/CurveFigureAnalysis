@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from PointDetector import *
-from utils.picProcessors import readLine
+from utils.picProcessors import readPicFromFile
 
 
 class LineFigure(object):
@@ -22,7 +22,7 @@ class LineFigure(object):
             raise TypeError("this method is dealt with np.ndarray get str instead, "
                             "please use the class Method @fromFile for str path ")
         self.testVersion = testVersion
-        self.rawPic, self.givePic, self.picLabel = rawPic, givenPic, picLabel
+        self.rawPic, self.givenPic, self.picLabel = rawPic, givenPic, picLabel
         self.mask = self.getMask()
 
         # preprocess, get blurred gray scale pic
@@ -46,7 +46,7 @@ class LineFigure(object):
         :param basicPath: the folder containing the pics
         :param testVersion: test or not
         """
-        rawPic, binaryPic, picLabel = readLine(basicPath)
+        rawPic, binaryPic, picLabel = readPicFromFile(basicPath)
         return cls(rawPic, binaryPic, picLabel, testVersion)
 
     @staticmethod

@@ -18,7 +18,7 @@ class BrokenLineFigure(LineFigure):
 
     @classmethod
     def fromFile(cls, id: int, testVersion=False):
-        rawPic, givenPic, picLabel = readLine("../../data/img_train_BrokenLine/%d" % id)
+        rawPic, givenPic, picLabel = readPicFromFile("../../data/img_train_BrokenLine/%d" % id)
         return cls(rawPic, givenPic, picLabel, testVersion)
 
     def TurningPointGet(self):
@@ -52,7 +52,7 @@ class BrokenLineFigure(LineFigure):
 
 
 if __name__ == '__main__':
-    for i in range(20, 30):
+    for i in range(100, 230):
         obj = BrokenLineFigure.fromFile(i)
         obj.getPoints()
     pass

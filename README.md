@@ -2,6 +2,13 @@
 ## 1.introduction
 #### It's a project target at extracting the line figure from the picture
 For example
+#### Change the pic of different background
+
+<img src="./images/01/draw.png"/>
+<img src="./images/01/draw_mask.png"/>
+<img src="./images/02/draw.png"/>
+<img src="./images/02/draw_mask.png"/>
+
 #### Focus on get data from the pics in the papers
 ## 2.basic function
 #### (1)read in the pics of Curve or BrokenLine.
@@ -13,7 +20,6 @@ We use three techs to detect the figure,for different compute power
 #### 1)Using traditional color divide method
 Basically we calc the color info and decide which color is the line color.
 
-<img src="./images/sample.png"/>
 
 And through canny and sobel method we also get the processed pic.
 Finally, we judge the quality of several pic, and return.

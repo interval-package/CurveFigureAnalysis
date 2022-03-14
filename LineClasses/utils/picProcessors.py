@@ -4,7 +4,7 @@ import pandas as pd
 
 
 # 读取文件
-def readLine(basicPath: str):
+def readPicFromFile(basicPath: str):
     # 标准化读取图片信息
     # print(basicPath + "/draw.png")
     rawPic = cv2.imread(basicPath + "/draw.png")
