@@ -2,7 +2,6 @@ import abc
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 from PointDetector import *
 from utils.picProcessors import readPicFromFile
 
@@ -147,8 +146,13 @@ class LineFigure(object):
         x = np.arange(0, 256)
         return hist_0, hist_1, hist_2, hist_gray, x
 
-    def imgOverlay(self) -> np.ndarray:
+    def imgOverlay(self):
         result = None
+
+        # 将图片标准化，白色背景的图片将会返回True，由后续反转颜色
+        def BinPicNormalize(pic_in) -> bool:
+            hist_inner = cv2.calcHist([pic_in], [0], self.mask, [2], [0, 256])
+            return hist_inner[0] < hist_inner[-1]
 
         gray, b, g, r = self.TotalFilter()
         thresPic = cv2.bitwise_and(
@@ -160,6 +164,9 @@ class LineFigure(object):
         cannyPic = cv2.dilate(cv2.Canny(self.gray, threshold1=5, threshold2=5), kernel)
         cannyPic = cv2.bitwise_and(cannyPic, self.mask)
         for pic in [gray, b, g, r, thresPic, cannyPic]:
+            if BinPicNormalize(pic):
+                # 反转颜色
+                pic = 255 - pic
             if self.binPicCertification(pic):
                 if result is None:
                     result = pic

@@ -11,5 +11,11 @@ def AdaptiveShow(inputs: list):
     return fig
 
 
+def DispPoints(x,y):
+    fig = plt.figure("Points output")
+    plt.plot(x,y)
+    return fig
+
+
 if __name__ == '__main__':
     pass
