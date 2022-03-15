@@ -8,6 +8,7 @@ from utils.picProcessors import readPicFromFile
 
 class LineFigure(object):
 
+    # constructors
     @abc.abstractmethod
     def __init__(self, rawPic, givenPic=None, picLabel=None, testVersion=False):
         """
@@ -48,6 +49,7 @@ class LineFigure(object):
         rawPic, binaryPic, picLabel = readPicFromFile(basicPath)
         return cls(rawPic, binaryPic, picLabel, testVersion)
 
+    # utils
     @staticmethod
     def binPicCertification(pic: np.ndarray, gap=10000) -> bool:
         """
@@ -109,7 +111,8 @@ class LineFigure(object):
         :return :extraction of three Channel plus gray figure
         """
         # 对三个色道，以及灰度的图片进行基于色值分布曲线的提取
-        b, g, r = cv2.split(self.rawPic)
+        # update：使用hsv比使用bgr好
+        h, s, v = cv2.split(cv2.cvtColor(self.rawPic, cv2.COLOR_BGR2HSV))
         binPics = []
 
         # 将图片标准化，白色背景的图片将会返回True，由后续反转颜色
@@ -117,7 +120,7 @@ class LineFigure(object):
             hist_inner = cv2.calcHist([pic_in], [0], self.mask, [2], [0, 256])
             return hist_inner[0] < hist_inner[-1]
 
-        for pic, channel in zip((self.gray, b, g, r), range(-1, 3)):
+        for pic, channel in zip((self.gray, h, s, v), range(-1, 3)):
             backClo, Clos = self.GetColorInterval(channel=channel)
             tempBin = None
             # 色彩分析会得到多种颜色，对每一种颜色进行筛选
@@ -146,7 +149,8 @@ class LineFigure(object):
         x = np.arange(0, 256)
         return hist_0, hist_1, hist_2, hist_gray, x
 
-    def imgOverlay(self):
+    # bin pic output
+    def BinPic_imgOverlay(self):
         result = None
 
         # 将图片标准化，白色背景的图片将会返回True，由后续反转颜色
@@ -154,8 +158,8 @@ class LineFigure(object):
             hist_inner = cv2.calcHist([pic_in], [0], self.mask, [2], [0, 256])
             return hist_inner[0] < hist_inner[-1]
 
-        gray, b, g, r = self.TotalFilter()
-        thresPic = cv2.bitwise_and(
+        gray, h, s, v = self.TotalFilter()
+        threshPic = cv2.bitwise_and(
             cv2.adaptiveThreshold(src=self.gray, maxValue=255, adaptiveMethod=cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
                                   thresholdType=cv2.THRESH_BINARY_INV, blockSize=11, C=12),
             self.mask)
@@ -163,7 +167,8 @@ class LineFigure(object):
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (7, 3))
         cannyPic = cv2.dilate(cv2.Canny(self.gray, threshold1=5, threshold2=5), kernel)
         cannyPic = cv2.bitwise_and(cannyPic, self.mask)
-        for pic in [gray, b, g, r, thresPic, cannyPic]:
+        # 这里使用的是全验证方式
+        for pic in [gray, h, s, v, threshPic, cannyPic]:
             if BinPicNormalize(pic):
                 # 反转颜色
                 pic = 255 - pic
@@ -179,9 +184,9 @@ class LineFigure(object):
             self.processedPic = result
         return result
 
-    def smoothOutput(self):
+    def BinPic_SmoothOutput(self):
         if self.processedPic is None:
-            result = self.imgOverlay()
+            result = self.BinPic_imgOverlay()
         else:
             result = self.processedPic
         # if ~self.binPicCertification(result, 20000):
@@ -190,6 +195,17 @@ class LineFigure(object):
         # result = cv2.morphologyEx(result, cv2.MORPH_CLOSE, kernel)
         # result = cv2.morphologyEx(result, cv2.MORPH_OPEN, kernel)
         return result
+
+    def BinPic_CentralDivide(self, epoch=100):
+        # 动态阈值算法
+        h, s, v = cv2.split(cv2.cvtColor(self.rawPic, cv2.COLOR_BGR2HSV))
+        temp = []
+        for channel in [h, s, v]:
+            # 随机初始化的阈值
+            thresh = 125
+            # 备份通道图片用于后续迭代
+            tempPic = channel.copy()
+        return
 
     def main(self):
         gray, b, g, r = self.TotalFilter()
@@ -200,7 +216,7 @@ class LineFigure(object):
         cannyPic = cv2.bitwise_and(
             cv2.Canny(self.gray, threshold1=5, threshold2=5),
             self.mask)
-        pics = [gray, b, g, r, threshPic, cannyPic, self.rawPic, self.imgOverlay(), self.smoothOutput()]
+        pics = [gray, b, g, r, threshPic, cannyPic, self.rawPic, self.BinPic_imgOverlay(), self.BinPic_SmoothOutput()]
         plt.figure("1")
         for i, pic in zip(range(1, len(pics) + 1), pics):
             plt.subplot(3, 3, i)

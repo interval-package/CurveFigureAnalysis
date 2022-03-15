@@ -187,6 +187,10 @@ class PointDetector(object):
             pd.DataFrame(data=[self.x, self.y], columns=['x', 'y']).to_excel(f)
         pass
 
+    def GetPercentageResult(self, percent=0.0) -> float:
+        pos = len(self.x)
+        return self.y[int(pos * percent)]
+
     def __len__(self):
         return len(self.x)
 

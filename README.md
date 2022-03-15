@@ -5,12 +5,16 @@ For example
 #### Change the pic to a binary pic:
 the normal background color:
 <img src="./images/02/draw.png"/>
+
+
 output:
 <img src="./images/02/draw_mask.png"/>
 
 #### with a different and more difficult condition:
 the black background color:
 <img src="./images/01/draw.png"/>
+
+
 output:
 <img src="./images/01/draw_mask.png"/>
 

@@ -13,7 +13,7 @@ class BrokenLineFigure(LineFigure):
         # super(BrokenLineFigure, self).__init__("../../data/img_train_BrokenLine/%d" % id, test)
         self.type = "BrokenLine"
         # 待定，可能使用PointDetector作为基类
-        self.pointsObj = PointDetector.FromBinPic(self.smoothOutput())
+        self.pointsObj = PointDetector.FromBinPic(self.BinPic_SmoothOutput())
         # 最好的目标是，折线图最后提取出来是一组点坐标
 
     @classmethod
@@ -25,7 +25,7 @@ class BrokenLineFigure(LineFigure):
         if self.processedPic is not None:
             pic = self.processedPic
         else:
-            pic = self.smoothOutput()
+            pic = self.BinPic_SmoothOutput()
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
         pic = cv2.morphologyEx(pic, cv2.MORPH_BLACKHAT, kernel)
         return pic
@@ -34,7 +34,7 @@ class BrokenLineFigure(LineFigure):
         if self.processedPic is not None:
             pic = self.processedPic
         else:
-            pic = self.smoothOutput()
+            pic = self.BinPic_SmoothOutput()
         # 中心法获取图像点
         x, y, x_c, y_c = LinePointDetectCentralize(pic)
         # Harris角点检测
