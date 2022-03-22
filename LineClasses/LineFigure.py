@@ -149,29 +149,34 @@ class LineFigure(object):
         x = np.arange(0, 256)
         return hist_0, hist_1, hist_2, hist_gray, x
 
+    def BinPicNormalize(self, pic_in) -> bool:
+        hist_inner = cv2.calcHist([pic_in], [0], self.mask, [2], [0, 256])
+        return hist_inner[0] < hist_inner[-1]
+
+    def getCannyPic(self):
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (7, 3))
+        cannyPic = cv2.dilate(cv2.Canny(self.gray, threshold1=5, threshold2=5), kernel)
+        if self.BinPicNormalize(cannyPic):
+            cannyPic = 255 - cannyPic
+        cannyPic = cv2.bitwise_and(cannyPic, self.mask)
+        return cannyPic
+
+    def AdaptiveThresh(self):
+        threshPic = cv2.adaptiveThreshold(src=self.gray, maxValue=255, adaptiveMethod=cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+                                          thresholdType=cv2.THRESH_BINARY_INV, blockSize=11, C=12)
+        if self.BinPicNormalize(threshPic):
+            threshPic = 255 - threshPic
+        threshPic = cv2.bitwise_and(threshPic, self.mask)
+        return threshPic
+
     # bin pic output
     def BinPic_imgOverlay(self):
         result = None
-
-        # 将图片标准化，白色背景的图片将会返回True，由后续反转颜色
-        def BinPicNormalize(pic_in) -> bool:
-            hist_inner = cv2.calcHist([pic_in], [0], self.mask, [2], [0, 256])
-            return hist_inner[0] < hist_inner[-1]
-
         gray, h, s, v = self.TotalFilter()
-        threshPic = cv2.bitwise_and(
-            cv2.adaptiveThreshold(src=self.gray, maxValue=255, adaptiveMethod=cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-                                  thresholdType=cv2.THRESH_BINARY_INV, blockSize=11, C=12),
-            self.mask)
-
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (7, 3))
-        cannyPic = cv2.dilate(cv2.Canny(self.gray, threshold1=5, threshold2=5), kernel)
-        cannyPic = cv2.bitwise_and(cannyPic, self.mask)
+        threshPic = self.AdaptiveThresh()
+        cannyPic = self.getCannyPic()
         # 这里使用的是全验证方式
         for pic in [gray, h, s, v, threshPic, cannyPic]:
-            if BinPicNormalize(pic):
-                # 反转颜色
-                pic = 255 - pic
             if self.binPicCertification(pic):
                 if result is None:
                     result = pic
@@ -196,7 +201,7 @@ class LineFigure(object):
         # result = cv2.morphologyEx(result, cv2.MORPH_OPEN, kernel)
         return result
 
-    def BinPic_CentralDivide(self, epoch=100):
+    def BinPic_CentralDivide(self, precision=0.1, epoch=100):
         # 动态阈值算法
         h, s, v = cv2.split(cv2.cvtColor(self.rawPic, cv2.COLOR_BGR2HSV))
         temp = []
@@ -205,6 +210,11 @@ class LineFigure(object):
             thresh = 125
             # 备份通道图片用于后续迭代
             tempPic = channel.copy()
+            i = 0
+            while i < epoch:
+                i += 1
+                tempPic = cv2.threshold(channel, thresh, 255, cv2.THRESH_BINARY)
+
         return
 
     def main(self):

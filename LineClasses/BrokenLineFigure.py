@@ -1,3 +1,5 @@
+import os
+import sys
 from functools import singledispatch
 import matplotlib.pyplot as plt
 from LineFigure import *
@@ -18,7 +20,10 @@ class BrokenLineFigure(LineFigure):
 
     @classmethod
     def fromFile(cls, id: int, testVersion=False):
-        rawPic, givenPic, picLabel = readPicFromFile("../../data/img_train_BrokenLine/%d" % id)
+        try:
+            rawPic, givenPic, picLabel = readPicFromFile("../../data/img_train_BrokenLine/%d" % id)
+        except IOError:
+            rawPic, givenPic, picLabel = readPicFromFile("data/img_train_BrokenLine/%d" % id)
         return cls(rawPic, givenPic, picLabel, testVersion)
 
     def TurningPointGet(self):
@@ -53,6 +58,7 @@ class BrokenLineFigure(LineFigure):
 
 if __name__ == '__main__':
     for i in range(100, 230):
-        obj = BrokenLineFigure.fromFile(i)
+        pic = cv2.imread("../images/02/draw.png")
+        obj = BrokenLineFigure(pic)
         obj.getPoints()
     pass

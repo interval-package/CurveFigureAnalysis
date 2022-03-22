@@ -6,7 +6,6 @@ from LineClasses.BrokenLineFigure import *
 
 
 def main():
-    BrokenLineFigure
     pass
 
 
