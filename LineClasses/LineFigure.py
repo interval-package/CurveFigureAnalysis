@@ -1,10 +1,5 @@
 import abc
-import cv2
-import matplotlib.pyplot as plt
-import numpy as np
-from LineClasses.PointDetector import *
-from LineClasses.utils.picProcessors import readPicFromFile
-from LineClasses.utils.dispUtils import AdaptiveShow
+from utils.picProcessors import readPicFromFile
 
 from HEDMethod.HEDRun import *
 
@@ -44,7 +39,7 @@ class LineFigure(object):
 
     @classmethod
     @abc.abstractmethod
-    def fromFile(cls, basicPath: str):
+    def fromId_TrainingSet(cls, basicPath: str):
         """
         :param basicPath: the folder containing the pics
         :param testVersion: test or not
@@ -241,5 +236,5 @@ class LineFigure(object):
 if __name__ == '__main__':
     for id in range(32, 100):
         print(id)
-        LineFigure.fromFile("../../data/img_train_BrokenLine/%d" % id)
+        LineFigure.fromId_TrainingSet("../../data/img_train_BrokenLine/%d" % id)
     pass

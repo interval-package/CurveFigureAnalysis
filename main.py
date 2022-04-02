@@ -10,7 +10,7 @@ from LineClasses.BrokenLineFigure import *
 
 
 def main(i):
-    obj = BrokenLineFigure.fromFile(i)
+    obj = BrokenLineFigure.fromId_TrainingSet(i)
 
     t_res = np.array(obj.picLabel[1])
     pos = FigureInfo(obj)

@@ -176,19 +176,6 @@ class PointDetector(object):
         y = (self.y + y) * scale_y
         return x, y
 
-    def Output2CSV(self, path='./PointsOutput.cvs'):
-        with open(path, 'w') as f:
-            writer = csv.writer(f)
-            # write a row to the csv file
-            for row in [self.x, self.y]:
-                writer.writerow(row)
-        pass
-
-    def Output2Excel(self, path='./PointsOutput.xls'):
-        with open(path) as f:
-            pd.DataFrame(data=[self.x, self.y], columns=['x', 'y']).to_excel(f)
-        pass
-
     def GetPercentageResult(self, percent=0.0) -> float:
         pos = len(self.y)
         return self.y[int(pos * percent)]
@@ -219,6 +206,10 @@ class FigureInfo(PointDetector):
         print("x:", int(-0.125 * shape[1]), "\ny:", int(-0.125 * shape[0]))
         y_scale = self.figure.picLabel[0][0] / (shape[0] * 0.75)
         self.x, self.y = self.PointsTrans(int(-0.125 * shape[1]), int(-0.125 * shape[0]), scale_y= y_scale)
+
+    def ResultOutput(self):
+        # t_res = np.array(self.figure.picLabel[1])
+        res = np.array(self.GetTestResult())
 
 
 if __name__ == '__main__':
