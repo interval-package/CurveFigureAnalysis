@@ -1,7 +1,11 @@
 import abc
+
+import cv2
+import numpy as np
+
 from utils.picProcessors import readPicFromFile
 
-from HEDMethod.HEDRun import *
+from HEDMethod.HEDRun import HEDDetect, PicTrans2HEDInput
 
 
 class LineFigure(object):
@@ -20,7 +24,7 @@ class LineFigure(object):
             raise TypeError("this method is dealt with np.ndarray get str instead, "
                             "please use the class Method @fromFile for str path ")
         # self.testVersion = testVersion
-        self.rawPic, self.givenPic, self.picLabel = rawPic, givenPic, picLabel
+        self.rawPic, self.givenPic, self.picLabel = PicTrans2HEDInput(rawPic), givenPic, picLabel
         self.mask = self.getMask()
 
         # preprocess, get blurred gray scale pic
@@ -38,11 +42,9 @@ class LineFigure(object):
         pass
 
     @classmethod
-    @abc.abstractmethod
-    def fromId_TrainingSet(cls, basicPath: str):
+    def fromFile(cls, basicPath: str):
         """
         :param basicPath: the folder containing the pics
-        :param testVersion: test or not
         """
         rawPic, binaryPic, picLabel = readPicFromFile(basicPath)
         return cls(rawPic, binaryPic, picLabel)
@@ -239,5 +241,5 @@ class LineFigure(object):
 if __name__ == '__main__':
     for id in range(32, 100):
         print(id)
-        LineFigure.fromId_TrainingSet("../../data/img_train_BrokenLine/%d" % id)
+        LineFigure.fromFile("../../data/img_train_BrokenLine/%d" % id)
     pass

@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 from utils.dispUtils import *
 
-from DetectionWrapper.PointDetector import *
+from DetectionWrapper.ResultProducer import *
 
 from LineClasses.BrokenLineFigure import *
 
@@ -17,7 +17,7 @@ def main(i):
     pos = FigureInfo(obj)
     res = np.array(pos.GetTestResult())
 
-    print((t_res - res)/t_res)
+    print((t_res - res) / t_res)
 
     AdaptiveShow(obj.BinPic_SetGetter())
     plt.show()
@@ -26,6 +26,6 @@ def main(i):
 
 
 if __name__ == '__main__':
-    for i in range(20, 100):
-        main(i)
+    obj = ResultProducer(0, 500)
+    obj.ProduceToExcel()
     pass
