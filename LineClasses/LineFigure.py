@@ -2,15 +2,15 @@ import abc
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
-from PointDetector import *
-from utils.picProcessors import readPicFromFile
+from LineClasses.PointDetector import *
+from LineClasses.utils.picProcessors import readPicFromFile
 
 
 class LineFigure(object):
 
     # constructors
     @abc.abstractmethod
-    def __init__(self, rawPic, givenPic=None, picLabel=None, testVersion=False):
+    def __init__(self, rawPic, givenPic=None, picLabel=None):
         """
         :param rawPic:
         :param givenPic: the given pic, maybe None
@@ -21,7 +21,7 @@ class LineFigure(object):
         if isinstance(rawPic, str):
             raise TypeError("this method is dealt with np.ndarray get str instead, "
                             "please use the class Method @fromFile for str path ")
-        self.testVersion = testVersion
+        # self.testVersion = testVersion
         self.rawPic, self.givenPic, self.picLabel = rawPic, givenPic, picLabel
         self.mask = self.getMask()
 
@@ -35,19 +35,19 @@ class LineFigure(object):
 
         self.processedPic = None
 
-        if testVersion:
-            self.main()
+        # if testVersion:
+        #     self.main()
         pass
 
     @classmethod
     @abc.abstractmethod
-    def fromFile(cls, basicPath: str, testVersion=False):
+    def fromFile(cls, basicPath: str):
         """
         :param basicPath: the folder containing the pics
         :param testVersion: test or not
         """
         rawPic, binaryPic, picLabel = readPicFromFile(basicPath)
-        return cls(rawPic, binaryPic, picLabel, testVersion)
+        return cls(rawPic, binaryPic, picLabel)
 
     # utils
     @staticmethod
@@ -70,7 +70,7 @@ class LineFigure(object):
         """
         rows, cols = self.rawPic.shape[:2]
         maskArea = np.zeros([rows, cols], dtype=np.uint8)
-        maskArea[int(rows * 0.125):int(rows * 0.875), int(cols * 0.127):int(cols * 0.9)] = 255
+        maskArea[int(rows * 0.125):int(rows * 0.875), int(cols * 0.125):int(cols * 0.875)] = 255
         return maskArea
 
     def GetColorInterval(self, channel=0, LineCloNums=2, distance=20):
@@ -217,26 +217,26 @@ class LineFigure(object):
 
         return
 
-    def main(self):
-        gray, b, g, r = self.TotalFilter()
-        threshPic = cv2.bitwise_and(
-            cv2.adaptiveThreshold(src=self.gray, maxValue=255, adaptiveMethod=cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-                                  thresholdType=cv2.THRESH_BINARY_INV, blockSize=11, C=12),
-            self.mask)
-        cannyPic = cv2.bitwise_and(
-            cv2.Canny(self.gray, threshold1=5, threshold2=5),
-            self.mask)
-        pics = [gray, b, g, r, threshPic, cannyPic, self.rawPic, self.BinPic_imgOverlay(), self.BinPic_SmoothOutput()]
-        plt.figure("1")
-        for i, pic in zip(range(1, len(pics) + 1), pics):
-            plt.subplot(3, 3, i)
-            plt.imshow(pic, 'gray')
-        plt.show()
-        pass
+    # def main(self):
+    #     gray, b, g, r = self.TotalFilter()
+    #     threshPic = cv2.bitwise_and(
+    #         cv2.adaptiveThreshold(src=self.gray, maxValue=255, adaptiveMethod=cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+    #                               thresholdType=cv2.THRESH_BINARY_INV, blockSize=11, C=12),
+    #         self.mask)
+    #     cannyPic = cv2.bitwise_and(
+    #         cv2.Canny(self.gray, threshold1=5, threshold2=5),
+    #         self.mask)
+    #     pics = [gray, b, g, r, threshPic, cannyPic, self.rawPic, self.BinPic_imgOverlay(), self.BinPic_SmoothOutput()]
+    #     plt.figure("1")
+    #     for i, pic in zip(range(1, len(pics) + 1), pics):
+    #         plt.subplot(3, 3, i)
+    #         plt.imshow(pic, 'gray')
+    #     plt.show()
+    #     pass
 
 
 if __name__ == '__main__':
     for id in range(32, 100):
         print(id)
-        LineFigure.fromFile("../../data/img_train_BrokenLine/%d" % id, True)
+        LineFigure.fromFile("../../data/img_train_BrokenLine/%d" % id)
     pass

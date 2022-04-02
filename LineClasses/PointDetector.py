@@ -160,7 +160,7 @@ class PointDetector(object):
         else:
             raise ValueError("invalid func with unfitted outputs")
 
-    def PointsTrans(self, x=0, y=0, scale_x=None, scale_y=None):
+    def PointsTrans(self, x=0, y=0, scale_x=1, scale_y=1):
         """
         parameters
         ==============
@@ -172,7 +172,9 @@ class PointDetector(object):
         ==============
         :return: this function will change the points within, and return the changed
         """
-        return
+        x = (self.x + x) * scale_x
+        y = (self.y + y) * scale_y
+        return x, y
 
     def Output2CSV(self, path='./PointsOutput.cvs'):
         with open(path, 'w') as f:
@@ -188,14 +190,35 @@ class PointDetector(object):
         pass
 
     def GetPercentageResult(self, percent=0.0) -> float:
-        pos = len(self.x)
+        pos = len(self.y)
         return self.y[int(pos * percent)]
+
+    def GetTestResult(self):
+        res = []
+        for i in [0, 0.25, 0.5, 0.75, 0.99]:
+            res.append(self.GetPercentageResult(i))
+        return res
 
     def __len__(self):
         return len(self.x)
 
     def __getitem__(self, item: int):
         return self.x[item], self.y[item]
+
+
+class FigureInfo(PointDetector):
+    def __init__(self, figure):
+        pos = PointDetector.FromBinPic(figure.BinPic_SmoothOutput())
+        super(FigureInfo, self).__init__(pos.x, pos.y, pos.x_all, pos.y_all)
+        self.figure = figure
+        self.Certification()
+
+    def Certification(self):
+        shape = self.figure.BinPic_SmoothOutput().shape
+        print("max height:", self.figure.picLabel[0][0], "\nlen:", shape[0] * 0.75)
+        print("x:", int(-0.125 * shape[1]), "\ny:", int(-0.125 * shape[0]))
+        y_scale = self.figure.picLabel[0][0] / (shape[0] * 0.75)
+        self.x, self.y = self.PointsTrans(int(-0.125 * shape[1]), int(-0.125 * shape[0]), scale_y= y_scale)
 
 
 if __name__ == '__main__':
