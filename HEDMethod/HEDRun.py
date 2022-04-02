@@ -135,8 +135,6 @@ def estimate(tenInput):
     intWidth = tenInput.shape[2]
     intHeight = tenInput.shape[1]
 
-    print(tenInput.shape)
-
     assert (
             intWidth == 480)  # remember that there is no guarantee for correctness, comment this line out if you
     # acknowledge this and want to continue

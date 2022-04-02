@@ -1,9 +1,6 @@
 from functools import singledispatch
-import matplotlib.pyplot as plt
 
-from DetectionWrapper.PointDetector import PointDetector, LinePointDetectCentralize
 from LineClasses.LineFigure import *
-import numpy as np
 import cv2
 
 

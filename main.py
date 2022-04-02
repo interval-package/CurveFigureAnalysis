@@ -2,9 +2,10 @@ import os
 
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.widgets import Slider, Button
 
-from HEDMethod.HEDRun import *
+from utils.dispUtils import *
+
+from DetectionWrapper.PointDetector import *
 
 from LineClasses.BrokenLineFigure import *
 

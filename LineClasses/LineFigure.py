@@ -113,11 +113,6 @@ class LineFigure(object):
         h, s, v = cv2.split(cv2.cvtColor(self.rawPic, cv2.COLOR_BGR2HSV))
         binPics = []
 
-        # 将图片标准化，白色背景的图片将会返回True，由后续反转颜色
-        def BinPicNormalize(pic_in) -> bool:
-            hist_inner = cv2.calcHist([pic_in], [0], self.mask, [2], [0, 256])
-            return hist_inner[0] < hist_inner[-1]
-
         for pic, channel in zip((self.gray, h, s, v), range(-1, 3)):
             backClo, Clos = self.GetColorInterval(channel=channel)
             tempBin = None
@@ -131,7 +126,7 @@ class LineFigure(object):
                 else:
                     raise ValueError("cv2 cannot filter the pic by Clo:%d" % Clo)
             if tempBin is not None:
-                if BinPicNormalize(tempBin):
+                if self.BinPicNormalize(tempBin):
                     # 反转颜色
                     tempBin = 255 - tempBin
                 binPics.append(cv2.bitwise_and(tempBin, self.mask))
@@ -170,9 +165,13 @@ class LineFigure(object):
 
     def BinPic_SetGetter(self):
         gray, h, s, v = self.TotalFilter()
+
         threshPic = self.AdaptiveThresh()
         cannyPic = self.getCannyPic()
-        hed, processed_hed = self.BinPic_HEDMethod()
+
+        hed = self.BinPic_HEDMethod_Raw()
+        processed_hed = self.BinPic_HEDMethod_Processed()
+
         bin_set = [gray, h, s, v, threshPic, cannyPic, hed, processed_hed]
         return bin_set
 
@@ -222,15 +221,19 @@ class LineFigure(object):
     #################################################################################
 
     # super func hed method
-    def BinPic_HEDMethod(self):
+    def BinPic_HEDMethod_Processed(self):
         pic = HEDDetect(self.rawPic)
-        pic = np.bitwise_and(pic, self.mask)
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (7, 7))
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
         _, res = cv2.threshold(pic, 40, 255, cv2.THRESH_BINARY)
         res = cv2.dilate(res, kernel, iterations=1)
         res = cv2.erode(res, kernel, iterations=1)
         res = np.bitwise_and(res, self.mask)
-        return pic, res
+        return res
+
+    def BinPic_HEDMethod_Raw(self):
+        pic = HEDDetect(self.rawPic)
+        pic = np.bitwise_and(pic, self.mask)
+        return pic
 
 
 if __name__ == '__main__':

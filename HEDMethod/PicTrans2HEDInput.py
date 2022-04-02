@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 
 
 def PicTrans2HEDInput(pic: np.ndarray, size=None) -> np.ndarray:
-    print(pic.shape)
     if size is None:
         width, height = 480, 320
     else:

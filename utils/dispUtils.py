@@ -11,9 +11,9 @@ def AdaptiveShow(inputs: list):
     return fig
 
 
-def DispPoints(x,y):
+def DispPoints(x, y):
     fig = plt.figure("Points output")
-    plt.plot(x,y)
+    plt.plot(x, y)
     return fig
 
 
