@@ -19,7 +19,7 @@ class BrokenLineFigure(LineFigure):
     @classmethod
     def fromFile(cls, id: int):
         rawPic, givenPic, picLabel = readPicFromFile("../data/img_train_BrokenLine/%d" % id)
-        return cls(rawPic, givenPic, picLabel)
+        return cls(PicTrans2HEDInput(rawPic), givenPic, picLabel)
 
     def TurningPointGet(self):
         if self.processedPic is not None:

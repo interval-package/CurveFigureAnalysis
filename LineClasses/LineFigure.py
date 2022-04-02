@@ -4,6 +4,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from LineClasses.PointDetector import *
 from LineClasses.utils.picProcessors import readPicFromFile
+from LineClasses.utils.dispUtils import AdaptiveShow
+
+from HEDMethod.HEDRun import *
 
 
 class LineFigure(object):
@@ -70,7 +73,7 @@ class LineFigure(object):
         """
         rows, cols = self.rawPic.shape[:2]
         maskArea = np.zeros([rows, cols], dtype=np.uint8)
-        maskArea[int(rows * 0.125):int(rows * 0.875), int(cols * 0.125):int(cols * 0.875)] = 255
+        maskArea[int(rows * 0.125):int(rows * 0.875), int(cols * 0.13):int(cols * 0.875)] = 255
         return maskArea
 
     def GetColorInterval(self, channel=0, LineCloNums=2, distance=20):
@@ -156,6 +159,7 @@ class LineFigure(object):
     def getCannyPic(self):
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (7, 3))
         cannyPic = cv2.dilate(cv2.Canny(self.gray, threshold1=5, threshold2=5), kernel)
+        cannyPic = cv2.erode(cannyPic,kernel)
         if self.BinPicNormalize(cannyPic):
             cannyPic = 255 - cannyPic
         cannyPic = cv2.bitwise_and(cannyPic, self.mask)
@@ -169,14 +173,20 @@ class LineFigure(object):
         threshPic = cv2.bitwise_and(threshPic, self.mask)
         return threshPic
 
-    # bin pic output
-    def BinPic_imgOverlay(self):
-        result = None
+    def BinPic_SetGetter(self):
         gray, h, s, v = self.TotalFilter()
         threshPic = self.AdaptiveThresh()
         cannyPic = self.getCannyPic()
+        hed, processed_hed = self.BinPic_HEDMethod()
+        bin_set = [gray, h, s, v, threshPic, cannyPic, hed, processed_hed]
+        return bin_set
+
+    # bin pic output
+    def BinPic_imgOverlay(self):
+        result = None
+        bin_set = self.BinPic_SetGetter()
         # 这里使用的是全验证方式
-        for pic in [gray, h, s, v, threshPic, cannyPic]:
+        for pic in bin_set:
             if self.binPicCertification(pic):
                 if result is None:
                     result = pic
@@ -194,13 +204,11 @@ class LineFigure(object):
             result = self.BinPic_imgOverlay()
         else:
             result = self.processedPic
-        # if ~self.binPicCertification(result, 20000):
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (7, 7))
         result = cv2.dilate(result, kernel)
-        # result = cv2.morphologyEx(result, cv2.MORPH_CLOSE, kernel)
-        # result = cv2.morphologyEx(result, cv2.MORPH_OPEN, kernel)
         return result
 
+    # undone
     def BinPic_CentralDivide(self, precision=0.1, epoch=100):
         # 动态阈值算法
         h, s, v = cv2.split(cv2.cvtColor(self.rawPic, cv2.COLOR_BGR2HSV))
@@ -214,25 +222,20 @@ class LineFigure(object):
             while i < epoch:
                 i += 1
                 tempPic = cv2.threshold(channel, thresh, 255, cv2.THRESH_BINARY)
-
         return
 
-    # def main(self):
-    #     gray, b, g, r = self.TotalFilter()
-    #     threshPic = cv2.bitwise_and(
-    #         cv2.adaptiveThreshold(src=self.gray, maxValue=255, adaptiveMethod=cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-    #                               thresholdType=cv2.THRESH_BINARY_INV, blockSize=11, C=12),
-    #         self.mask)
-    #     cannyPic = cv2.bitwise_and(
-    #         cv2.Canny(self.gray, threshold1=5, threshold2=5),
-    #         self.mask)
-    #     pics = [gray, b, g, r, threshPic, cannyPic, self.rawPic, self.BinPic_imgOverlay(), self.BinPic_SmoothOutput()]
-    #     plt.figure("1")
-    #     for i, pic in zip(range(1, len(pics) + 1), pics):
-    #         plt.subplot(3, 3, i)
-    #         plt.imshow(pic, 'gray')
-    #     plt.show()
-    #     pass
+    #################################################################################
+
+    # super func hed method
+    def BinPic_HEDMethod(self):
+        pic = HEDDetect(self.rawPic)
+        pic = np.bitwise_and(pic, self.mask)
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (7, 7))
+        _, res = cv2.threshold(pic, 40, 255, cv2.THRESH_BINARY)
+        res = cv2.dilate(res, kernel, iterations=1)
+        res = cv2.erode(res, kernel, iterations=1)
+        res = np.bitwise_and(res, self.mask)
+        return pic, res
 
 
 if __name__ == '__main__':
