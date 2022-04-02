@@ -171,10 +171,10 @@ class LineFigure(object):
         threshPic = self.AdaptiveThresh()
         cannyPic = self.getCannyPic()
 
-        hed = self.BinPic_HEDMethod_Raw()
+        hed = self.BinPic_HEDMethod_Adapt_Tres()
         processed_hed = self.BinPic_HEDMethod_Processed()
 
-        bin_set = [gray, h, s, v, threshPic, cannyPic, hed, processed_hed]
+        bin_set = [gray, v, threshPic, cannyPic, hed, processed_hed]
         return bin_set
 
     # bin pic output
@@ -232,9 +232,10 @@ class LineFigure(object):
         res = np.bitwise_and(res, self.mask)
         return res
 
-    def BinPic_HEDMethod_Raw(self):
+    def BinPic_HEDMethod_Adapt_Tres(self):
         pic = HEDDetect(self.rawPic)
         pic = np.bitwise_and(pic, self.mask)
+        _, pic = cv2.threshold(pic, 10, 255, cv2.THRESH_BINARY)
         return pic
 
 
