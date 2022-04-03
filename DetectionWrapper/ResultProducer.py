@@ -26,7 +26,7 @@ class ResultProducer(object):
     def __getitem__(self, index):
         res = [0, 0, 0, 0, 0]
         try:
-            res = FigureInfo(LineFigure.fromFile(self.path + '{}'.format(index))).GetTestResult()
+            res = FigureInfo(LineFigure.fromFile(self.path + '{}'.format(index))).GetResult()
         except IndexError as e:
             print(repr(e))
         except ValueError as e:

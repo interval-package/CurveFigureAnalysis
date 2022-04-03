@@ -14,14 +14,18 @@ def main(i):
     obj = BrokenLineFigure.fromId_TrainingSet(i)
 
     # t_res = np.array(obj.picLabel[1])
+    #
     # pos = FigureInfo(obj)
     # res = np.array(pos.GetTestResult())
     #
     # print((t_res - res) / t_res)
-    pic_set = obj.BinPic_SetGetter()
-    pic_set.append(obj.BinPic_SmoothOutput())
-    AdaptiveShow(pic_set)
-    plt.show()
+
+    # pic_set = obj.BinPic_SetGetter()
+    # pic_set.append(obj.BinPic_SmoothOutput())
+    # pic_set.append(obj.rawPic)
+    # AdaptiveShow(pic_set)
+    # plt.show()
+    print(obj.rawPic.shape)
     pass
 
 

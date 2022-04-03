@@ -17,7 +17,6 @@ class LineFigure(object):
         :param rawPic:
         :param givenPic: the given pic, maybe None
         :param picLabel:
-        :param testVersion: test or not, if test, do the main func
         """
         # testVersion：是否以测试模式构建对象
         if isinstance(rawPic, str):
@@ -234,8 +233,8 @@ class LineFigure(object):
 
     def BinPic_HEDMethod_Adapt_Tres(self):
         pic = HEDDetect(self.rawPic)
-        pic = np.bitwise_and(pic, self.mask)
-        _, pic = cv2.threshold(pic, 10, 255, cv2.THRESH_BINARY)
+        # pic = np.bitwise_and(pic, self.mask)
+        # _, pic = cv2.threshold(pic, 10, 255, cv2.THRESH_BINARY)
         return pic
 
 
