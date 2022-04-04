@@ -7,8 +7,11 @@ from LineClasses.BrokenLineFigure import *
 
 def main(i):
     obj = FigureInfo(BrokenLineFigure.fromId_TrainingSet(i))
-    obj.DisplayResult()
-    AdaptiveShow(obj.figure.BinPic_SetGetter())
+    for i in obj.Pos_Set:
+        i.Display_All()
+        i.Display_Sliced()
+    f = plt.figure()
+    plt.imshow(obj.figure.rawPic)
     plt.show()
     print("\ngap\n")
     pass
