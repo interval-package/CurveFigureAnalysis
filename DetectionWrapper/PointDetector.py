@@ -55,8 +55,12 @@ class PointDetector(object):
 
     def GetResult_TarVector_ByPercentage(self):
         res = []
-        for i in [0, 0.25, 0.5, 0.75, 0.99]:
-            res.append(self.GetResult_Specific_ByPercentage(i))
+        try:
+            for i in [0, 0.25, 0.5, 0.75, 0.99]:
+                res.append(self.GetResult_Specific_ByPercentage(i))
+        except IndexError as e:
+            print(repr(e))
+            res = [0, 0, 0, 0, 0]
         return res
 
     def GetResult_Specific_ByX_Clump(self, pos, Deciding_Method, window=5):
@@ -73,19 +77,7 @@ class PointDetector(object):
     def GetResult_TarVector_ByX(self, func):
         res = []
         for i in [0, 0.25, 0.5, 0.75, 0.99]:
-            res.append(func(int(i*self.x_len)))
-        return res
-
-
-class FigureInfo(object):
-    def __init__(self, figure):
-        self.figure = figure
-        self.Pos_Set = []
-        for i in figure.BinPic_SetGetter():
-            self.Pos_Set.append(PointDetector.FromBinPic(i, figure.picLabel[0][0]))
-
-    def GetResult(self):
-        res = [0, 0, 0, 0, 0]
+            res.append(func(int(i * self.x_len)))
         return res
 
 

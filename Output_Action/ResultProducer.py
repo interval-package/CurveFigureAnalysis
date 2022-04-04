@@ -1,4 +1,4 @@
-from DetectionWrapper.PointDetector import *
+from Output_Action.FigureInfo import FigureInfo
 from LineClasses.LineFigure import LineFigure
 
 import xlwt

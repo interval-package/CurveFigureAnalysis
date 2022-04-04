@@ -17,7 +17,7 @@ def PicTrans2HEDInput(pic: np.ndarray, size=None) -> np.ndarray:
 
 
 if __name__ == '__main__':
-    pic = cv2.imread("../../data/img_train_BrokenLine/3/draw.png")
+    pic = cv2.imread("../../../data/img_train_BrokenLine/3/draw.png")
     plt.subplot(2, 2, 1)
     plt.imshow(pic)
     plt.subplot(2, 2, 2)

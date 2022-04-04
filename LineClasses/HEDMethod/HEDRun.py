@@ -1,15 +1,12 @@
 # we cite the work of arXiv:1504.06375 [cs.CV]
-import matplotlib.pyplot as plt
 import numpy as np
 import torch
-import getopt
 import numpy
 import PIL
 import PIL.Image
 import cv2
-import sys
 
-from HEDMethod.PicTrans2HEDInput import PicTrans2HEDInput
+from LineClasses.HEDMethod.PicTrans2HEDInput import PicTrans2HEDInput
 
 
 # environment init

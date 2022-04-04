@@ -5,7 +5,7 @@ import numpy as np
 
 from utils.picProcessors import readPicFromFile
 
-from HEDMethod.HEDRun import HEDDetect, PicTrans2HEDInput
+from LineClasses.HEDMethod.HEDRun import HEDDetect, PicTrans2HEDInput
 
 
 class LineFigure(object):
