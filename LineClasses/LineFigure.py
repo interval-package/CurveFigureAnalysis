@@ -69,7 +69,7 @@ class LineFigure(object):
         """
         rows, cols = self.rawPic.shape[:2]
         maskArea = np.zeros([rows, cols], dtype=np.uint8)
-        maskArea[int(rows * 0.125):int(rows * 0.875), int(cols * 0.13):int(cols * 0.875)] = 255
+        maskArea[int(rows * 0.125):int(rows * 0.875), int(cols * 0.125):int(440)] = 255
         return maskArea
 
     def GetColorInterval(self, channel=0, LineCloNums=2, distance=20):

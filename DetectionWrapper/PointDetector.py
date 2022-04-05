@@ -52,7 +52,7 @@ class PointDetector(object):
 
     def PointsTrans_Targeted(self, shape, max_val):
         y_scale = max_val / (shape[0] * 0.75)
-        print(int(-0.125 * shape[1]), int(-0.125 * shape[0]), (shape[0] * 0.75), max_val)
+        # print(int(-0.125 * shape[1]), int(-0.125 * shape[0]), (shape[0] * 0.75), max_val)
         self.PointsTrans(int(-0.125 * shape[1]),
                          int(-0.125 * shape[0]), scale_y=y_scale)
 
@@ -88,14 +88,18 @@ class PointDetector(object):
     def GetResult_Specific_ByX_PeakDecide(self):
         return
 
-    x_len = 360
+    x_len = 380
 
     def GetResult_TarVector_ByX(self, func=None):
         if func is None:
             func = self.GetResult_Specific_ByX_Clump
         res = []
         for i in [0, 0.25, 0.5, 0.75, 0.99]:
-            res.append(func(int(i * self.x_len)))
+            try:
+                res.append(func(int(i * self.x_len)))
+            except IndexError as e:
+                print(repr(e))
+                res.append(0)
         return res
 
     def GetSlice_ByX(self, pos, window=5):
@@ -117,13 +121,19 @@ class PointDetector(object):
                 plt.subplot(2, 3, i + 1)
                 plt.plot(item[0], item[1], '.')
         except ValueError as e:
-            print(repr(e))
+            # print(repr(e))
             return None
         return f
 
-    def Display_All(self):
+    def Display_All(self, sliced_info=False):
         f = plt.figure()
         plt.plot(self.x_all, self.y_all, '.')
+        if sliced_info:
+            tar = self.GetResult_TarVector_ByX(func=self.GetSlice_ByX)
+            for item in tar:
+                if item is None:
+                    continue
+                plt.plot(item[0], item[1], '.', color='red')
         return f
 
 
