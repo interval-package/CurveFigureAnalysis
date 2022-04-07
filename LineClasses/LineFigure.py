@@ -103,7 +103,7 @@ class LineFigure(object):
                 break
         return backgroundColor, lineColors
 
-    def TotalFilter(self, distance=10):
+    def BinPic_TotalFilter(self, distance=10):
         """
         对三个色道，以及灰度的图片进行基于色值分布曲线的提取
         :param distance:　for each filtered clo we define a gap for each to in range
@@ -147,7 +147,7 @@ class LineFigure(object):
         hist_inner = cv2.calcHist([pic_in], [0], self.mask, [2], [0, 256])
         return hist_inner[0] < hist_inner[-1]
 
-    def getCannyPic(self):
+    def BinPic_getCannyPic(self):
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (7, 3))
         cannyPic = cv2.dilate(cv2.Canny(self.gray, threshold1=5, threshold2=5), kernel)
         cannyPic = cv2.erode(cannyPic,kernel)
@@ -156,7 +156,7 @@ class LineFigure(object):
         cannyPic = cv2.bitwise_and(cannyPic, self.mask)
         return cannyPic
 
-    def AdaptiveThresh(self):
+    def BinPic_AdaptiveThresh(self):
         threshPic = cv2.adaptiveThreshold(src=self.gray, maxValue=255, adaptiveMethod=cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
                                           thresholdType=cv2.THRESH_BINARY_INV, blockSize=11, C=12)
         if self.BinPicNormalize(threshPic):
@@ -165,10 +165,10 @@ class LineFigure(object):
         return threshPic
 
     def BinPic_SetGetter(self):
-        gray, h, s, v = self.TotalFilter()
+        gray, h, s, v = self.BinPic_TotalFilter()
 
-        threshPic = self.AdaptiveThresh()
-        cannyPic = self.getCannyPic()
+        threshPic = self.BinPic_AdaptiveThresh()
+        cannyPic = self.BinPic_getCannyPic()
 
         hed = self.BinPic_HEDMethod_Adapt_Tres()
         processed_hed = self.BinPic_HEDMethod_Processed()
