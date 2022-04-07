@@ -15,6 +15,13 @@ class FigureInfo(object):
         for res in self.Pos_Set:
             print(res.GetResult_TarVector_ByX())
 
-    def GetResult(self):
-        res = [0, 0, 0, 0, 0]
-        return res
+    def Output_GroupDecision_Vote(self, func_res):
+        tar = []
+        for i in self.Pos_Set:
+            tar.append(i.GetResult_TarVector_ByX(func_res))
+
+        return
+
+    @staticmethod
+    def Output_Bad_Result():
+        return [0, 0, 0, 0, 0]
