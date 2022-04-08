@@ -21,7 +21,7 @@ class FigureInfo(object):
         tar = []
         for i in self.Pos_Set:
             tar.append(i.GetResult_TarVector_ByX(func_res))
-        print(tar)
+        
         return
 
     def Output_raw(self):
