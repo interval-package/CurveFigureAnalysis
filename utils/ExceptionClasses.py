@@ -1,6 +1,11 @@
 
 
-class OutputErrorOfBlank(Exception):
+class OutputErrorOfBadQuality(Exception):
+    def __init__(self, msg=''):
+        super(OutputErrorOfBadQuality, self).__init__(msg)
+
+
+class OutputErrorOfBlank(OutputErrorOfBadQuality):
     def __init__(self, msg):
         super(OutputErrorOfBlank, self).__init__("invalid of blank,  " +msg)
 

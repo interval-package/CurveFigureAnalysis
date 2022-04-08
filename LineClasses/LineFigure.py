@@ -50,7 +50,7 @@ class LineFigure(object):
 
     # utils
     @staticmethod
-    def binPicCertification(pic: np.ndarray, gap=10000) -> bool:
+    def IsBinPicValid(pic: np.ndarray, gap=10000) -> bool:
         """
         :param pic: binary pic
         :param gap: the minimal num of valid points
@@ -127,7 +127,7 @@ class LineFigure(object):
                 else:
                     raise ValueError("cv2 cannot filter the pic by Clo:%d" % Clo)
             if tempBin is not None:
-                if self.BinPicNormalize(tempBin):
+                if self.IsBinPicNormalized(tempBin):
                     # 反转颜色
                     tempBin = 255 - tempBin
                 binPics.append(cv2.bitwise_and(tempBin, self.mask))
@@ -143,15 +143,17 @@ class LineFigure(object):
         x = np.arange(0, 256)
         return hist_0, hist_1, hist_2, hist_gray, x
 
-    def BinPicNormalize(self, pic_in) -> bool:
+    def IsBinPicNormalized(self, pic_in) -> bool:
         hist_inner = cv2.calcHist([pic_in], [0], self.mask, [2], [0, 256])
         return hist_inner[0] < hist_inner[-1]
+
+    # BinPic_ methods render the binary output
 
     def BinPic_getCannyPic(self):
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (7, 3))
         cannyPic = cv2.dilate(cv2.Canny(self.gray, threshold1=5, threshold2=5), kernel)
-        cannyPic = cv2.erode(cannyPic,kernel)
-        if self.BinPicNormalize(cannyPic):
+        cannyPic = cv2.erode(cannyPic, kernel)
+        if self.IsBinPicNormalized(cannyPic):
             cannyPic = 255 - cannyPic
         cannyPic = cv2.bitwise_and(cannyPic, self.mask)
         return cannyPic
@@ -159,7 +161,7 @@ class LineFigure(object):
     def BinPic_AdaptiveThresh(self):
         threshPic = cv2.adaptiveThreshold(src=self.gray, maxValue=255, adaptiveMethod=cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
                                           thresholdType=cv2.THRESH_BINARY_INV, blockSize=11, C=12)
-        if self.BinPicNormalize(threshPic):
+        if self.IsBinPicNormalized(threshPic):
             threshPic = 255 - threshPic
         threshPic = cv2.bitwise_and(threshPic, self.mask)
         return threshPic
@@ -182,7 +184,7 @@ class LineFigure(object):
         bin_set = self.BinPic_SetGetter()
         # 这里使用的是全验证方式
         for pic in bin_set:
-            if self.binPicCertification(pic):
+            if self.IsBinPicValid(pic):
                 if result is None:
                     result = pic
                 else:
@@ -233,8 +235,8 @@ class LineFigure(object):
 
     def BinPic_HEDMethod_Adapt_Tres(self):
         pic = HEDDetect(self.rawPic)
-        # pic = np.bitwise_and(pic, self.mask)
-        # _, pic = cv2.threshold(pic, 10, 255, cv2.THRESH_BINARY)
+        pic = np.bitwise_and(pic, self.mask)
+        _, pic = cv2.threshold(pic, 10, 255, cv2.THRESH_BINARY)
         return pic
 
 

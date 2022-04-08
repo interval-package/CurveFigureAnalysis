@@ -3,6 +3,21 @@ import numpy as np
 import pandas as pd
 
 
+# utils
+def IsBinPicValid(pic: np.ndarray, gap=10000) -> bool:
+    """
+    :param pic: binary pic
+    :param gap: the minimal num of valid points
+    :return: bool, the pic is valid or not
+    """
+    # 图像有效性验证，如果图像内部为真的像素点过少，则验证失败
+    if pic.ndim > 2:
+        raise ValueError("you should input a binary pic for certification")
+    hist_inner = cv2.calcHist([pic], [0], None, [2], [0, 256])
+    # print(hist_inner)
+    return hist_inner[-1] > gap
+
+
 # 读取文件
 def readPicFromFile(basicPath: str):
     # 标准化读取图片信息

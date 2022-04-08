@@ -1,5 +1,9 @@
+import numpy as np
+
 from Output_Action.FigureInfo import FigureInfo
 from LineClasses.LineFigure import LineFigure
+
+from utils.ExceptionClasses import *
 
 import xlwt
 
@@ -24,13 +28,12 @@ class ResultProducer(object):
             self.path = '../data/img_test_Curve/'
 
     def __getitem__(self, index):
-        res = [0, 0, 0, 0, 0]
+        obj = FigureInfo(LineFigure.fromFile(self.path + '{}'.format(index)))
+        res = obj.figure.picLabel[0][0] * np.ones((1, 5))
         try:
-            res = FigureInfo(LineFigure.fromFile(self.path + '{}'.format(index))).GetResult()
-        except IndexError as e:
-            print(repr(e))
-        except ValueError as e:
-            print(repr(e))
+            res = obj.Output_Bad_Result()
+        except OutputErrorOfBadQuality as e:
+            pass
         return res
 
     def ProduceToSheet(self, workbook, sheet_name='Sheet 1'):

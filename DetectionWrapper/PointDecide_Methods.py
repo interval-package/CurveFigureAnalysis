@@ -9,3 +9,7 @@ def DoNothing(obj):
 def ClumpDecide_PeakMethod(x, y):
 
     return
+
+
+def ClumpDecide_PeaKMethod_Interp(x, y):
+    return

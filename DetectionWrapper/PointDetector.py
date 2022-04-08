@@ -1,8 +1,10 @@
 import matplotlib.pyplot as plt
+import numpy as np
 
 from DetectionWrapper.PointDetectFunctions import *
 from DetectionWrapper.PointDecide_Methods import *
 from utils.ExceptionClasses import *
+from utils.picProcessors import IsBinPicValid
 
 
 class PointDetector(object):
@@ -18,6 +20,8 @@ class PointDetector(object):
 
     @classmethod
     def FromBinPic(cls, pic, max_val=None, detectFun=LinePointDetectCentralize):
+        if ~IsBinPicValid(pic):
+            raise OutputErrorOfBadQuality()
         if pic.ndim > 2:
             raise ValueError("the input should be a bin Pic")
         obj = detectFun(pic)
@@ -51,11 +55,23 @@ class PointDetector(object):
         self.y_all = (self.y_all + y) * scale_y
         return
 
+    # we assume that after trans the end of line are at the pos x = x_len
+    x_len = 370
+
     def PointsTrans_Targeted(self, shape, max_val):
         y_scale = max_val / (shape[0] * 0.75)
         # print(int(-0.125 * shape[1]), int(-0.125 * shape[0]), (shape[0] * 0.75), max_val)
         self.PointsTrans(int(-0.125 * shape[1]),
                          int(-0.125 * shape[0]), scale_y=y_scale)
+
+    def MissedPoints_Fill_Interp(self):
+        x = np.arange(1, self.x_len + 1)
+        self.y = np.interp(x, self.x, self.y)
+        self.x = x
+        pass
+
+    def Points_To_Peaks(self):
+        return
 
     # output methods
     # if Specific returns x
@@ -83,16 +99,13 @@ class PointDetector(object):
 
     # by x methods
 
-    # we assume that after trans the end of line are at the pos x = x_len
-    x_len = 380
-
     def GetResult_Specific_ByX_Centralized(self, pos):
         tar = self.y[self.x == pos]
         if len(tar) == 0:
             raise OutputErrorOfSpecificPos("point do not found")
         return tar[0]
 
-    def GetResult_Specific_ByX_Centralized_Inserted(self, pos, window=10):
+    def GetResult_Specific_ByX_Centralized_Fitted_Insert(self, pos, window=10):
         tar = np.bitwise_and(self.x > pos - window, self.x < pos + window)
         x = self.x[tar]
         y = self.y[tar]
@@ -104,6 +117,17 @@ class PointDetector(object):
         p1 = np.poly1d(np.polyfit(x, y, 3))
         return p1(pos)
 
+    def GetResult_Specific_ByX_Centralized_Interp_Insert(self, pos, window=10):
+        tar = np.bitwise_and(self.x > pos - window, self.x < pos + window)
+        x = self.x[tar]
+        y = self.y[tar]
+        if len(x) == 0 or len(y) == 0:
+            if window > 6:
+                raise OutputErrorOfBlank("")
+            else:
+                raise OutputErrorOfSpecificPos("")
+        return np.interp(pos, x, y)[0]
+
     def GetResult_Specific_ByX_Clump(self, pos, deciding_method=DoNothing, window=5):
         try:
             tar_y = deciding_method(self.GetSlice_ByX(pos, window))
@@ -111,14 +135,14 @@ class PointDetector(object):
             return None
         return tar_y
 
-    def GetResult_Specific_ByX_PeakDecide(self):
+    def GetResult_Specific_ByX_PeakDecide(self, pos):
         return
 
     def GetResult_TarVector_ByX(self, func=None):
         if func is None:
             func = self.GetResult_Specific_ByX_Centralized
         res = []
-        for i in [0, 0.25, 0.5, 0.75, 0.99]:
+        for i in [0, 0.25, 0.5, 0.75, 1]:
             try:
                 res.append(func(int(i * self.x_len)))
             except IndexError as e:
