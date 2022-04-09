@@ -76,6 +76,8 @@ BrokenLineFigure and CurveFigure for more detail process
 
 We build a website for a more portable usage.
 
+![image-20220409210200665](D:\coding\PythonProjects\CurveFigureAnalysis\images\image-20220409210200665.png)
+
 ## 5.Acknowledgement
 
 ### papers:
