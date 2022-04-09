@@ -35,6 +35,7 @@ class LineFigure(object):
         self.gray = process2Gray(self.rawPic)
 
         self.processedPic = None
+        self.bin_set = None
 
         # if testVersion:
         #     self.main()
@@ -50,7 +51,7 @@ class LineFigure(object):
 
     # utils
     @staticmethod
-    def IsBinPicValid(pic: np.ndarray, gap=10000) -> bool:
+    def IsBinPic_Valid(pic: np.ndarray, gap=1000) -> bool:
         """
         :param pic: binary pic
         :param gap: the minimal num of valid points
@@ -62,6 +63,9 @@ class LineFigure(object):
         hist_inner = cv2.calcHist([pic], [0], None, [2], [0, 256])
         # print(hist_inner)
         return hist_inner[-1] > gap
+
+    def IsBinPic_GoodQuality(self):
+        pass
 
     def getMask(self) -> np.ndarray:
         """
@@ -172,10 +176,13 @@ class LineFigure(object):
         threshPic = self.BinPic_AdaptiveThresh()
         cannyPic = self.BinPic_getCannyPic()
 
-        hed = self.BinPic_HEDMethod_Adapt_Tres()
-        processed_hed = self.BinPic_HEDMethod_Processed()
+        # hed = self.BinPic_HEDMethod_Adapt_Tres()
+        # processed_hed = self.BinPic_HEDMethod_Processed()
 
-        bin_set = [gray, v, threshPic, cannyPic, hed, processed_hed]
+        bin_set = [threshPic, gray, v, cannyPic]
+
+        self.bin_set = bin_set
+
         return bin_set
 
     # bin pic output
@@ -184,7 +191,7 @@ class LineFigure(object):
         bin_set = self.BinPic_SetGetter()
         # 这里使用的是全验证方式
         for pic in bin_set:
-            if self.IsBinPicValid(pic):
+            if self.IsBinPic_Valid(pic):
                 if result is None:
                     result = pic
                 else:

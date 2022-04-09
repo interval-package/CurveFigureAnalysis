@@ -31,7 +31,7 @@ class ResultProducer(object):
         obj = FigureInfo(LineFigure.fromFile(self.path + '{}'.format(index)))
         res = obj.figure.picLabel[0][0] * np.ones((1, 5))
         try:
-            res = obj.Output_Bad_Result()
+            res = obj.Output_Mean_Hierarchy()
         except OutputErrorOfBadQuality as e:
             pass
         return res

@@ -20,8 +20,8 @@ class PointDetector(object):
 
     @classmethod
     def FromBinPic(cls, pic, max_val=None, detectFun=LinePointDetectCentralize):
-        if ~IsBinPicValid(pic):
-            raise OutputErrorOfBadQuality()
+        # if ~IsBinPicValid(pic):
+        #     raise OutputErrorOfBadQuality()
         if pic.ndim > 2:
             raise ValueError("the input should be a bin Pic")
         obj = detectFun(pic)
@@ -34,6 +34,7 @@ class PointDetector(object):
             raise ValueError("invalid func with unfitted outputs")
         if max_val is not None:
             tar.PointsTrans_Targeted(pic.shape, max_val)
+            tar.MissedPoints_Fill_Interp()
         return tar
 
     def PointsTrans(self, x=0, y=0, scale_x=1, scale_y=1, ):
@@ -58,6 +59,8 @@ class PointDetector(object):
     # we assume that after trans the end of line are at the pos x = x_len
     x_len = 370
 
+    x_pos = [int(i * 370) for i in [0, 0.25, 0.5, 0.75, 0]]
+
     def PointsTrans_Targeted(self, shape, max_val):
         y_scale = max_val / (shape[0] * 0.75)
         # print(int(-0.125 * shape[1]), int(-0.125 * shape[0]), (shape[0] * 0.75), max_val)
@@ -65,9 +68,12 @@ class PointDetector(object):
                          int(-0.125 * shape[0]), scale_y=y_scale)
 
     def MissedPoints_Fill_Interp(self):
-        x = np.arange(1, self.x_len + 1)
-        self.y = np.interp(x, self.x, self.y)
-        self.x = x
+        x = np.arange(0, self.x_len + 1)
+        try:
+            self.y = np.interp(x, self.x, self.y)
+            self.x = x
+        except ValueError as e:
+            pass
         pass
 
     def Points_To_Peaks(self):
@@ -106,15 +112,18 @@ class PointDetector(object):
         return tar[0]
 
     def GetResult_Specific_ByX_Centralized_Fitted_Insert(self, pos, window=10):
-        tar = np.bitwise_and(self.x > pos - window, self.x < pos + window)
-        x = self.x[tar]
-        y = self.y[tar]
-        if len(x) == 0 or len(y) == 0:
+        tar = np.bitwise_and(self.x_all > pos - window, self.x_all < pos + window)
+        x = self.x_all[tar]
+        y = self.y_all[tar]
+        if len(x) < 3 or len(y) < 3:
             if window > 6:
                 raise OutputErrorOfBlank("")
             else:
                 raise OutputErrorOfSpecificPos("")
-        p1 = np.poly1d(np.polyfit(x, y, 3))
+        try:
+            p1 = np.poly1d(np.polyfit(x, y, 3))
+        except Exception as e:
+            raise OutputErrorOfSpecificPos(repr(e))
         return p1(pos)
 
     def GetResult_Specific_ByX_Centralized_Interp_Insert(self, pos, window=10):
