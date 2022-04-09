@@ -5,10 +5,11 @@ from DetectionWrapper.PointDetectFunctions import *
 from DetectionWrapper.PointDecide_Methods import *
 from utils.ExceptionClasses import *
 from utils.picProcessors import IsBinPicValid
+from scipy.signal import find_peaks
 
 
 class PointDetector(object):
-    def __init__(self, x, y, x_all=None, y_all=None):
+    def __init__(self, x, y, x_all=None, y_all=None, max_val=None):
         self.x, self.y = x, y
         if x_all is None or y_all is None:
             self.x_all = x
@@ -16,6 +17,14 @@ class PointDetector(object):
         else:
             self.x_all = x_all
             self.y_all = y_all
+
+        pass
+
+    def AlterInit_Correction(self):
+        self.peaks, _ = find_peaks(self.y)
+        self.trough, _ = find_peaks(-self.y)
+
+        self.PeakAndTrough_Correction_All()
         pass
 
     @classmethod
@@ -27,14 +36,15 @@ class PointDetector(object):
         obj = detectFun(pic)
         length = len(obj)
         if length == 2:
-            tar = cls(obj[0], obj[1])
+            tar = cls(obj[0], obj[1], max_val=max_val)
         elif length == 4:
-            tar = cls(obj[0], obj[1], obj[2], obj[3])
+            tar = cls(obj[0], obj[1], obj[2], obj[3], max_val=max_val)
         else:
             raise ValueError("invalid func with unfitted outputs")
         if max_val is not None:
             tar.PointsTrans_Targeted(pic.shape, max_val)
             tar.MissedPoints_Fill_Interp()
+            # tar.AlterInit_Correction()
         return tar
 
     def PointsTrans(self, x=0, y=0, scale_x=1, scale_y=1, ):
@@ -59,7 +69,7 @@ class PointDetector(object):
     # we assume that after trans the end of line are at the pos x = x_len
     x_len = 370
 
-    x_pos = [int(i * 370) for i in [0, 0.25, 0.5, 0.75, 1]]
+    x_pos = [0, 93, 187, 282, 370]
 
     def PointsTrans_Targeted(self, shape, max_val):
         y_scale = max_val / (shape[0] * 0.75)
@@ -76,8 +86,34 @@ class PointDetector(object):
             pass
         pass
 
-    def Points_To_Peaks(self):
+    def Peak_Correction(self, peak_pos, window=3):
+        for i in range(peak_pos - window, peak_pos + 5):
+            try:
+                tar = self.y_all[self.x_all == i]
+                if len(tar) == 0:
+                    continue
+                self.y[i] = max(tar)
+            except Exception as e:
+                print(repr(e))
         return
+
+    def Trough_Correction(self, trough_pos, window=3):
+        for i in range(trough_pos - window, trough_pos + 5):
+            try:
+                tar = self.y_all[self.x_all == i]
+                if len(tar) == 0:
+                    continue
+                self.y[i] = min(tar)
+            except Exception as e:
+                print(repr(e))
+        return
+
+    def PeakAndTrough_Correction_All(self):
+        for peak in self.peaks:
+            self.Peak_Correction(peak)
+
+        for trough in self.trough:
+            self.Trough_Correction(trough)
 
     # output methods
     # if Specific returns x
@@ -106,12 +142,14 @@ class PointDetector(object):
     # by x methods
 
     def GetResult_Specific_ByX_Centralized(self, pos):
-        tar = self.y[self.x == pos]
-        if len(tar) == 0:
-            raise OutputErrorOfSpecificPos("point do not found")
-        return tar[0]
+        try:
+            tar = self.y[self.x == pos]
+            return tar[0]
+        except IndexError as e:
+            raise OutputErrorOfBlank(repr(e))
+        pass
 
-    def GetResult_Specific_ByX_Centralized_Fitted_Insert(self, pos, window=10):
+    def GetResult_Specific_ByX_Centralized_Fitted_Insert(self, pos, window=20):
         tar = np.bitwise_and(self.x_all > pos - window, self.x_all < pos + window)
         x = self.x_all[tar]
         y = self.y_all[tar]
@@ -151,16 +189,24 @@ class PointDetector(object):
         if func is None:
             func = self.GetResult_Specific_ByX_Centralized
         res = []
-        for i in [0, 0.25, 0.5, 0.75, 1]:
+        for i in self.x_pos:
             try:
-                res.append(func(int(i * self.x_len)))
-            except IndexError as e:
-                res.append(None)
-            except OutputErrorOfSpecificPos:
-                res.append(None)
+                res.append(func(i))
             except OutputErrorOfBlank:
                 return None
         return res
+
+    # multimethod of output
+
+    # peaks
+
+    def Is_PeakOrTrough(self, pos, window=3):
+        # for peak, iter_peak in zip(self.peaks, range(len(self.peaks))):
+        #     if peak
+        return
+
+    def GetResults_Peaks_(self):
+        return
 
     # get sliced method
 

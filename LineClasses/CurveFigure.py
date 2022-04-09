@@ -4,7 +4,7 @@ from LineClasses.LineFigure import *
 import cv2
 
 
-class BrokenLineFigure(LineFigure):
+class CurveFigure(LineFigure):
     @singledispatch
     def __init__(self, rawPic, givenPic=None, picLabel=None):
         # read in the pic into the obj
@@ -14,12 +14,12 @@ class BrokenLineFigure(LineFigure):
 
     @classmethod
     def fromId_TrainingSet(cls, id: int):
-        rawPic, givenPic, picLabel = readPicFromFile("../data/img_train_BrokenLine/%d" % id)
+        rawPic, givenPic, picLabel = readPicFromFile("../data/img_train_Curve/%d" % id)
         return cls(rawPic, givenPic, picLabel)
 
     @classmethod
     def fromId_TestingSet(cls, id: int):
-        rawPic, givenPic, picLabel = readPicFromFile("../data/img_test_BrokenLine/%d" % id)
+        rawPic, givenPic, picLabel = readPicFromFile("../data/img_test_Curve/%d" % id)
         return cls(rawPic, givenPic, picLabel)
 
     def TurningPointGet(self):

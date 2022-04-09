@@ -13,9 +13,13 @@ class FigureInfo(object):
         for i in figure.BinPic_SetGetter():
             self.Pos_Set.append(PointDetector.FromBinPic(i, figure.picLabel[0][0]))
 
+        self.poi = self.Get_Poi_Hierarchy()
+
     def DisplayResult(self):
         for res in self.Pos_Set:
             print(res.GetResult_TarVector_ByX())
+
+    # Output funcs phase 1
 
     def Output_GroupDecision_Vote(self):
         tar = []
@@ -30,7 +34,7 @@ class FigureInfo(object):
                 return tar
         pass
 
-    def Output_Central_Fit_Hierarchy(self):
+    def Output_Central_Interp_Hierarchy(self):
         for pos in self.Pos_Set:
             tar = pos.GetResult_TarVector_ByX(pos.GetResult_Specific_ByX_Centralized)
             if tar is not None:
@@ -48,15 +52,22 @@ class FigureInfo(object):
                 return tar
         return
 
-    def Get_Poi_Hierarchy(self):
+    def Output_Central_Fit_Correction(self):
         for pos in self.Pos_Set:
             tar = pos.GetResult_TarVector_ByX(pos.GetResult_Specific_ByX_Centralized_Fitted_Insert)
             if tar is not None:
-                return pos
-        pass
+                return tar
+        return
 
     def Output_raw(self):
         raise OutputErrorOfBadQuality()
+
+    # Output func phase 2
+
+    def Output_Multi_func(self):
+        pass
+
+    # display
 
     def display(self, func_res):
         f = plt.figure()
@@ -66,6 +77,15 @@ class FigureInfo(object):
                 continue
             plt.plot(poi, '.')
         return f
+
+    # obj return
+
+    def Get_Poi_Hierarchy(self):
+        for pos in self.Pos_Set:
+            tar = pos.GetResult_TarVector_ByX(pos.GetResult_Specific_ByX_Centralized)
+            if tar is not None:
+                return pos
+        pass
 
     @staticmethod
     def Output_Bad_Result():

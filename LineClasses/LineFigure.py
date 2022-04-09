@@ -76,7 +76,7 @@ class LineFigure(object):
         """
         rows, cols = self.rawPic.shape[:2]
         maskArea = np.zeros([rows, cols], dtype=np.uint8)
-        maskArea[int(rows * 0.125):int(rows * 0.875), int(62):int(435)] = 255
+        maskArea[45:int(rows * 0.875), int(62):int(430)] = 255
         return maskArea
 
     def GetColorInterval(self, channel=0, LineCloNums=2, distance=20):
@@ -184,9 +184,12 @@ class LineFigure(object):
 
         bin_set = [threshPic, gray, v, cannyPic]
 
-        self.bin_set = bin_set
+        res = []
 
-        return bin_set
+        for pic in bin_set:
+            if self.IsBinPic_Valid(pic):
+                res.append(pic)
+        return res
 
     # bin pic output
     def BinPic_imgOverlay(self):
