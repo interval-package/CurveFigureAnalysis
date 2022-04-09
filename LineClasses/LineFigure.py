@@ -23,7 +23,10 @@ class LineFigure(object):
             raise TypeError("this method is dealt with np.ndarray get str instead, "
                             "please use the class Method @fromFile for str path ")
         # self.testVersion = testVersion
-        self.rawPic, self.givenPic, self.picLabel = PicTrans2HEDInput(rawPic), givenPic, picLabel
+        self.rawPic, givenPic, self.picLabel = PicTrans2HEDInput(rawPic), PicTrans2HEDInput(givenPic), picLabel
+        if givenPic is not None:
+            _, givenPic = cv2.threshold(cv2.cvtColor(givenPic, cv2.COLOR_BGR2GRAY), 125, 255, cv2.THRESH_BINARY)
+        self.givenPic = givenPic
         self.mask = self.getMask()
 
         # preprocess, get blurred gray scale pic
@@ -73,7 +76,7 @@ class LineFigure(object):
         """
         rows, cols = self.rawPic.shape[:2]
         maskArea = np.zeros([rows, cols], dtype=np.uint8)
-        maskArea[int(rows * 0.125):int(rows * 0.875), int(cols * 0.125):int(440)] = 255
+        maskArea[int(rows * 0.125):int(rows * 0.875), int(62):int(435)] = 255
         return maskArea
 
     def GetColorInterval(self, channel=0, LineCloNums=2, distance=20):

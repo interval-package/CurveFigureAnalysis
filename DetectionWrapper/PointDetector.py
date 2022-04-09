@@ -59,12 +59,12 @@ class PointDetector(object):
     # we assume that after trans the end of line are at the pos x = x_len
     x_len = 370
 
-    x_pos = [int(i * 370) for i in [0, 0.25, 0.5, 0.75, 0]]
+    x_pos = [int(i * 370) for i in [0, 0.25, 0.5, 0.75, 1]]
 
     def PointsTrans_Targeted(self, shape, max_val):
         y_scale = max_val / (shape[0] * 0.75)
         # print(int(-0.125 * shape[1]), int(-0.125 * shape[0]), (shape[0] * 0.75), max_val)
-        self.PointsTrans(int(-0.125 * shape[1]),
+        self.PointsTrans(int(-0.13 * shape[1]),
                          int(-0.125 * shape[0]), scale_y=y_scale)
 
     def MissedPoints_Fill_Interp(self):

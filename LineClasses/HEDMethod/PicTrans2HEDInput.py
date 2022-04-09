@@ -3,14 +3,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def PicTrans2HEDInput(pic: np.ndarray, size=None) -> np.ndarray:
+def PicTrans2HEDInput(pic: np.ndarray, size=None):
+    if pic is None:
+        return None
     if size is None:
         width, height = 480, 320
     else:
         width, height = size
     cols, rows, _ = pic.shape
     matrix = np.float32([[width / rows, 0, 0],
-                         [0,height / cols,  0],
+                         [0, height / cols, 0],
                          [0, 0, 1]])
     output = cv2.warpPerspective(src=pic, M=matrix, dsize=(width, height))
     return output

@@ -48,7 +48,7 @@ class FigureInfo(object):
                 return tar
         return
 
-    def Display_Hierarchy(self):
+    def Get_Poi_Hierarchy(self):
         for pos in self.Pos_Set:
             tar = pos.GetResult_TarVector_ByX(pos.GetResult_Specific_ByX_Centralized_Fitted_Insert)
             if tar is not None:
