@@ -37,6 +37,7 @@ class ResultProducer(object):
     def __getitem__(self, index):
         if self.type == 1:
             obj = FigureInfo(CurveFigure.fromId_TestingSet(index)).Get_Poi_Hierarchy()
+            obj.AlterInit_Correction()
         else:
             obj = FigureInfo(BrokenLineFigure.fromId_TestingSet(index)).Get_Poi_Hierarchy()
             obj.AlterInit_Correction()

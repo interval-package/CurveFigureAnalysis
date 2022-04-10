@@ -67,16 +67,13 @@ class LineFigure(object):
         # print(hist_inner)
         return hist_inner[-1] > gap
 
-    def IsBinPic_GoodQuality(self):
-        pass
-
     def getMask(self) -> np.ndarray:
         """
         :return 通过设定的预期值获取最基本的蒙版
         """
         rows, cols = self.rawPic.shape[:2]
         maskArea = np.zeros([rows, cols], dtype=np.uint8)
-        maskArea[45:int(rows * 0.875), int(62):int(430)] = 255
+        maskArea[45:282, int(62):int(430)] = 255
         return maskArea
 
     def GetColorInterval(self, channel=0, LineCloNums=2, distance=20):
@@ -174,21 +171,28 @@ class LineFigure(object):
         return threshPic
 
     def BinPic_SetGetter(self):
+        res = []
+
         gray, h, s, v = self.BinPic_TotalFilter()
 
         threshPic = self.BinPic_AdaptiveThresh()
-        cannyPic = self.BinPic_getCannyPic()
 
         # hed = self.BinPic_HEDMethod_Adapt_Tres()
         # processed_hed = self.BinPic_HEDMethod_Processed()
 
-        bin_set = [threshPic, gray, v, cannyPic]
-
-        res = []
+        bin_set = [threshPic, gray, v]
 
         for pic in bin_set:
             if self.IsBinPic_Valid(pic):
                 res.append(pic)
+
+        if len(res) > 2:
+            return res
+
+        cannyPic = self.BinPic_getCannyPic()
+        res.append(cannyPic)
+        # hed = self.BinPic_HEDMethod_Processed()
+        # res.append(hed)
         return res
 
     # bin pic output

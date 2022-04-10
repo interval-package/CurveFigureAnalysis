@@ -24,7 +24,7 @@ class PointDetector(object):
         self.peaks, _ = find_peaks(self.y)
         self.trough, _ = find_peaks(-self.y)
 
-        self.PeakAndTrough_Correction_All()
+        self.PeakAndTrough_Correction_All(1)
         pass
 
     @classmethod
@@ -69,13 +69,13 @@ class PointDetector(object):
     # we assume that after trans the end of line are at the pos x = x_len
     x_len = 370
 
-    x_pos = [0, 93, 187, 282, 370]
+    x_pos = [0, 93, 187, 281, 370]
 
     def PointsTrans_Targeted(self, shape, max_val):
         y_scale = max_val / (shape[0] * 0.75)
         # print(int(-0.125 * shape[1]), int(-0.125 * shape[0]), (shape[0] * 0.75), max_val)
-        self.PointsTrans(int(-0.13 * shape[1]),
-                         int(-0.125 * shape[0]), scale_y=y_scale)
+        self.PointsTrans(-61,
+                         -40, scale_y=y_scale)
 
     def MissedPoints_Fill_Interp(self):
         x = np.arange(0, self.x_len + 1)
@@ -108,12 +108,12 @@ class PointDetector(object):
                 print(repr(e))
         return
 
-    def PeakAndTrough_Correction_All(self):
+    def PeakAndTrough_Correction_All(self, window=2):
         for peak in self.peaks:
-            self.Peak_Correction(peak)
+            self.Peak_Correction(peak, window)
 
         for trough in self.trough:
-            self.Trough_Correction(trough)
+            self.Trough_Correction(trough, window)
 
     # output methods
     # if Specific returns x
@@ -150,9 +150,9 @@ class PointDetector(object):
         pass
 
     def GetResult_Specific_ByX_Centralized_Fitted_Insert(self, pos, window=20):
-        tar = np.bitwise_and(self.x_all > pos - window, self.x_all < pos + window)
-        x = self.x_all[tar]
-        y = self.y_all[tar]
+        tar = np.bitwise_and(self.x > pos - window, self.x < pos + window)
+        x = self.x[tar]
+        y = self.y[tar]
         if len(x) < 3 or len(y) < 3:
             if window > 6:
                 raise OutputErrorOfBlank("")

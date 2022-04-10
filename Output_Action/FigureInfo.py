@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 
 from DetectionWrapper.PointDetector import PointDetector
 from LineClasses.LineFigure import LineFigure
@@ -27,7 +28,7 @@ class FigureInfo(object):
     def Output_Central_Interp_Hierarchy(self):
         tar = self.poi.GetResult_TarVector_ByX(self.poi.GetResult_Specific_ByX_Centralized)
         if tar is not None:
-            return tar
+            return np.array(tar)
         return
 
     def Output_Mean_Hierarchy(self):
@@ -43,8 +44,8 @@ class FigureInfo(object):
     def Output_Central_Fit_Correction(self):
         tar = self.poi.GetResult_TarVector_ByX(self.poi.GetResult_Specific_ByX_Centralized_Fitted_Insert)
         if tar is not None:
-            return tar
-        return
+            return np.array(tar)
+        return None
 
     # Output func phase 2
 
