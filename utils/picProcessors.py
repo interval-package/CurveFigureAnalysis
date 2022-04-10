@@ -27,16 +27,24 @@ def readPicFromFile(basicPath: str):
         raise ValueError("invalid path")
     binary_pic = None
     try:
-        binary_pic = cv2.imread(basicPath + "/draw_mask.png")
-        # pic_label = pd.read_table(basicPath + "/db.txt", engine='python', delimiter="\n")
-    except IOError as IOe:
-        print('repr(IOe):\t', repr(IOe))
-    except Exception as e:
-        print('repr(e):\t', repr(e))
-    with open(basicPath + "/db.txt") as f:
-        # w, h = [int(x) for x in next(f).split()]
-        pic_label = [[float(x) for x in line.split(',')] for line in f]
-        return rawPic, binary_pic, pic_label
+        with open(basicPath + "/db.txt") as f:
+            # w, h = [int(x) for x in next(f).split()]
+            pic_label = [[float(x) for x in line.split(',')] for line in f]
+    except IOError:
+        pic_label = [100]
+
+        binary_pic = None
+
+    if len(pic_label) > 1:
+        try:
+            binary_pic = cv2.imread(basicPath + "/draw_mask.png")
+            # pic_label = pd.read_table(basicPath + "/db.txt", engine='python', delimiter="\n")
+        except IOError as IOe:
+            print('repr(IOe):\t', repr(IOe))
+        except Exception as e:
+            print('repr(e):\t', repr(e))
+
+    return rawPic, binary_pic, pic_label
 
 
 def eraseFrame(img: np.ndarray) -> np.ndarray:
