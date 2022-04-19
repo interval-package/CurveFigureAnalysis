@@ -38,18 +38,17 @@ def main(i):
     # obj = FigureInfo(CurveFigure.fromId_TrainingSet(i))
     # Display_AllPoints(obj)
     print(i)
-    obj = FigureInfo(BrokenLineFigure.fromId_TestingSet(i))
-    Display_allRawPic(obj)
-    Display_AllPoints_Test(obj)
+    obj = BrokenLineFigure.fromId_TestingSet(i)
+    for pic in obj.BinPic_SetGetter():
+        plt.imshow(pic,'gray')
+        plt.show()
+    # obj = FigureInfo(BrokenLineFigure.fromId_TestingSet(i))
+    # Display_allRawPic(obj)
+    # Display_AllPoints_Test(obj)
     pass
 
 
 if __name__ == '__main__':
-
-    bad_set = [7, 12, 40, 47, 53, 71, 86, 101, 130, 145, 146]
-
-    for i in bad_set:
-        main(i)
 
     for i in range(0, 500):
         main(i)
