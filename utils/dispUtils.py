@@ -82,6 +82,10 @@ def Display_AllPoints_Test(obj: FigureInfo):
     plt.show()
 
 
+def Display_All_BinPic(obj: FigureInfo):
+    pass
+
+
 def ImCorrection(obj: FigureInfo):
     poi = obj.Get_Poi_Hierarchy()
     res = obj.figure.picLabel[1]
