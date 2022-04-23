@@ -126,6 +126,7 @@ def estimate(tenInput):
 
     # load network
     if HEDNetNetwork_GlobalVar is None:
+        print("loading Hed models")
         HEDNetNetwork_GlobalVar = Network().cuda().eval()
     # end
 

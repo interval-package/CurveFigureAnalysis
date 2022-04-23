@@ -1,13 +1,5 @@
 from init import *
 
-import matplotlib.pyplot as plt
-
-from utils.dispUtils import *
-
-
-
-UsingHed = False
-
 
 def Display_allRawPic(in_: FigureInfo):
     obj = in_.figure
@@ -40,7 +32,7 @@ def main(i):
     print(i)
     obj = BrokenLineFigure.fromId_TestingSet(i)
     for pic in obj.BinPic_SetGetter():
-        plt.imshow(pic,'gray')
+        plt.imshow(pic, 'gray')
         plt.show()
     # obj = FigureInfo(BrokenLineFigure.fromId_TestingSet(i))
     # Display_allRawPic(obj)

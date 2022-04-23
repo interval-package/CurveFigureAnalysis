@@ -5,6 +5,10 @@ import cv2
 
 
 class CurveFigure(LineFigure):
+    DataSetPath_Curve_train = "../data/img_train_Curve"
+
+    DataSetPath_Curve_test = "../data/img_test_Curve"
+
     @singledispatch
     def __init__(self, rawPic, givenPic=None, picLabel=None):
         # read in the pic into the obj
@@ -14,12 +18,12 @@ class CurveFigure(LineFigure):
 
     @classmethod
     def fromId_TrainingSet(cls, id: int):
-        rawPic, givenPic, picLabel = readPicFromFile("../data/img_train_Curve/%d" % id)
+        rawPic, givenPic, picLabel = readPicFromFile(cls.DataSetPath_Curve_train + "/%d" % id)
         return cls(rawPic, givenPic, picLabel)
 
     @classmethod
     def fromId_TestingSet(cls, id: int):
-        rawPic, givenPic, picLabel = readPicFromFile("../data/img_test_Curve/%d" % id)
+        rawPic, givenPic, picLabel = readPicFromFile(cls.DataSetPath_Curve_test + "/%d" % id)
         return cls(rawPic, givenPic, picLabel)
 
     def TurningPointGet(self):

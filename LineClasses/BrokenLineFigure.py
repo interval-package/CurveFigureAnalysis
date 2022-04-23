@@ -5,6 +5,10 @@ import cv2
 
 
 class BrokenLineFigure(LineFigure):
+    DataSetPath_BrokenLine_test = "../data/img_test_BrokenLine"
+
+    DataSetPath_BrokenLine_train = "../data/img_train_BrokenLine"
+
     @singledispatch
     def __init__(self, rawPic, givenPic=None, picLabel=None):
         # read in the pic into the obj
@@ -14,12 +18,12 @@ class BrokenLineFigure(LineFigure):
 
     @classmethod
     def fromId_TrainingSet(cls, id: int):
-        rawPic, givenPic, picLabel = readPicFromFile("../data/img_train_BrokenLine/%d" % id)
+        rawPic, givenPic, picLabel = readPicFromFile(cls.DataSetPath_BrokenLine_train + "/%d" % id)
         return cls(rawPic, givenPic, picLabel)
 
     @classmethod
     def fromId_TestingSet(cls, id: int):
-        rawPic, givenPic, picLabel = readPicFromFile("../data/img_test_BrokenLine/%d" % id)
+        rawPic, givenPic, picLabel = readPicFromFile(cls.DataSetPath_BrokenLine_test + "/%d" % id)
         return cls(rawPic, givenPic, picLabel)
 
     def TurningPointGet(self):

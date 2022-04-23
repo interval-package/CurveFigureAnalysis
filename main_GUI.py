@@ -1,11 +1,13 @@
 import sys
 
+from init import *
+
 from PyQt5.QtWidgets import QApplication
 from GUI.GUIWrapper import GUIMain
 from GUI.GUIWrapper import *
 
 
-if __name__ == '__main__':
+def Gui_main():
     # 初始化软件，这是必要操作
     app = QApplication(sys.argv)
 
@@ -15,4 +17,8 @@ if __name__ == '__main__':
 
     # 结束所有逻辑，之前所有循环的逻辑结束
     sys.exit(app.exec_())
+
+
+if __name__ == '__main__':
+    Gui_main()
     pass
