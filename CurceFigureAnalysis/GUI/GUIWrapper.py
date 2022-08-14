@@ -1,8 +1,8 @@
 from PyQt5.QtWidgets import QStackedWidget
 
-from GUI.Pages.MainWindow.MainWindow import *
+from CurceFigureAnalysis.GUI.Pages.MainWindow.MainWindow import *
 
-from GUI.Pages.StartPage.StartPageWrapper import StartPage
+from CurceFigureAnalysis.GUI.Pages.StartPage.StartPageWrapper import StartPage
 
 
 class GUIMain(QtWidgets.QMainWindow, Ui_MainWindow):

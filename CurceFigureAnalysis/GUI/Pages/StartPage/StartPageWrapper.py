@@ -1,4 +1,4 @@
-from GUI.Pages.StartPage.StartPage import *
+from CurceFigureAnalysis.GUI.Pages.StartPage.StartPage import *
 import os
 
 

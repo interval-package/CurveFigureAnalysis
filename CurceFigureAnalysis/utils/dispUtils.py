@@ -3,10 +3,7 @@ from matplotlib import pyplot as plt
 
 from Output_Action.ResultProducer import *
 
-from DetectionWrapper.PointDetector import PointDetector
-
-from LineClasses.BrokenLineFigure import *
-from LineClasses.CurveFigure import *
+from CurceFigureAnalysis.LineClasses.BrokenLineFigure import *
 
 
 def AdaptiveShow(inputs: list):

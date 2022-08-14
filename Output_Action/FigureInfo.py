@@ -1,10 +1,7 @@
-import matplotlib.pyplot as plt
 import numpy as np
 
-from DetectionWrapper.PointDetector import PointDetector
-from LineClasses.LineFigure import LineFigure
-
-from utils.ExceptionClasses import *
+from CurceFigureAnalysis.DetectionWrapper.PointDetector import PointDetector
+from CurceFigureAnalysis.LineClasses.LineFigure import LineFigure
 
 
 class FigureInfo(object):

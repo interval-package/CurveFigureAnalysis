@@ -1,11 +1,10 @@
 import numpy as np
 
 from Output_Action.FigureInfo import FigureInfo
-from LineClasses.LineFigure import LineFigure
-from LineClasses.BrokenLineFigure import BrokenLineFigure
-from LineClasses.CurveFigure import CurveFigure
+from CurceFigureAnalysis.LineClasses.BrokenLineFigure import BrokenLineFigure
+from CurceFigureAnalysis.LineClasses.CurveFigure import CurveFigure
 
-from utils.ExceptionClasses import *
+from CurceFigureAnalysis.utils.ExceptionClasses import *
 
 import xlwt
 

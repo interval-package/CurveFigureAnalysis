@@ -3,14 +3,14 @@ import abc
 import cv2
 import numpy as np
 
-from utils.picProcessors import readPicFromFile
+from CurceFigureAnalysis.utils.picProcessors import readPicFromFile
 
 UsingHed = True
 try:
-    from LineClasses.HEDMethod.HEDRun import HEDDetect, PicTrans2HEDInput
+    from CurceFigureAnalysis.LineClasses.HEDMethod.HEDRun import HEDDetect, PicTrans2HEDInput
 except ModuleNotFoundError:
     UsingHed = False
-    from LineClasses.HEDMethod.PicTrans2HEDInput import PicTrans2HEDInput
+    from CurceFigureAnalysis.LineClasses.HEDMethod.PicTrans2HEDInput import PicTrans2HEDInput
     pass
 
 

@@ -1,10 +1,8 @@
 import matplotlib.pyplot as plt
-import numpy as np
 
-from DetectionWrapper.PointDetectFunctions import *
-from DetectionWrapper.PointDecide_Methods import *
-from utils.ExceptionClasses import *
-from utils.picProcessors import IsBinPicValid
+from CurceFigureAnalysis.DetectionWrapper.PointDetectFunctions import *
+from CurceFigureAnalysis.DetectionWrapper.PointDecide_Methods import *
+from CurceFigureAnalysis.utils.ExceptionClasses import *
 from scipy.signal import find_peaks
 
 

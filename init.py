@@ -1,11 +1,7 @@
+from CurceFigureAnalysis.LineClasses.BrokenLineFigure import BrokenLineFigure
+from CurceFigureAnalysis.LineClasses.CurveFigure import CurveFigure
+
 import matplotlib.pyplot as plt
-
-from utils.dispUtils import *
-
-from LineClasses.LineFigure import LineFigure
-from LineClasses.BrokenLineFigure import BrokenLineFigure
-from LineClasses.CurveFigure import CurveFigure
-
 # init actions
 
 UsingHed = False

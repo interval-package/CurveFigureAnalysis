@@ -6,7 +6,7 @@ import PIL
 import PIL.Image
 import cv2
 
-from LineClasses.HEDMethod.PicTrans2HEDInput import PicTrans2HEDInput
+from CurceFigureAnalysis.LineClasses.HEDMethod.PicTrans2HEDInput import PicTrans2HEDInput
 
 
 # environment init

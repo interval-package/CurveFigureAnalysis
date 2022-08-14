@@ -1,10 +1,7 @@
 import sys
 
-from init import *
-
 from PyQt5.QtWidgets import QApplication
-from GUI.GUIWrapper import GUIMain
-from GUI.GUIWrapper import *
+from CurceFigureAnalysis.GUI.GUIWrapper import *
 
 
 def Gui_main():
