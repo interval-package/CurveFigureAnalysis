@@ -4,10 +4,14 @@ this package aim to fit binary pic to a series of ponits
 
 """
 
-import PointDecide_Methods
+import logging
 
-import PointDetectFunctions
+logging.debug("[cfa] initiating DetectionWrapper")
 
-import PointDetector
+# import PointDecide_Methods
+#
+# import PointDetectFunctions
+#
+# import PointDetector
 
 

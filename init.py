@@ -1,6 +1,8 @@
 from CurceFigureAnalysis.LineClasses.BrokenLineFigure import BrokenLineFigure
 from CurceFigureAnalysis.LineClasses.CurveFigure import CurveFigure
 
+from Output_Action.FigureInfo import FigureInfo
+
 import matplotlib.pyplot as plt
 # init actions
 

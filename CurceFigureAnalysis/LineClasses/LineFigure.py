@@ -1,21 +1,23 @@
 import abc
 
 import cv2
+import logging
 import numpy as np
 
 from CurceFigureAnalysis.utils.picProcessors import readPicFromFile
 
 UsingHed = True
+
 try:
     from CurceFigureAnalysis.LineClasses.HEDMethod.HEDRun import HEDDetect, PicTrans2HEDInput
 except ModuleNotFoundError:
     UsingHed = False
+    logging.debug("[cfa] Hed method disabled")
     from CurceFigureAnalysis.LineClasses.HEDMethod.PicTrans2HEDInput import PicTrans2HEDInput
     pass
 
 
 class LineFigure(object):
-
     # constructors
     @abc.abstractmethod
     def __init__(self, rawPic, givenPic=None, picLabel=None):
@@ -206,9 +208,11 @@ class LineFigure(object):
 
         threshPic = self.BinPic_AdaptiveThresh()
         cannyPic = self.BinPic_getCannyPic()
-        hed = self.BinPic_HEDMethod_Processed()
-        return [gray, h, s, v, threshPic, cannyPic, hed]
-
+        res = [gray, h, s, v, threshPic, cannyPic]
+        if UsingHed:
+            hed = self.BinPic_HEDMethod_Processed()
+            res.append(hed)
+        return res
 
     # bin pic output
     def BinPic_imgOverlay(self):
